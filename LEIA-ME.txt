@@ -1,0 +1,129 @@
+GRUPO TURING — DIÁRIO ACADÊMICO
+=================================
+
+Curso: Engenharia da Computação
+Integrantes: Enzo, João, Matheus, Marcus e Marcelo
+
+Este projeto foi feito de propósito com uma complexidade baixa.
+A ideia é que vocês consigam estudar o código enquanto montam o site.
+
+ARQUIVOS
+--------
+
+index.html
+    É a estrutura do site.
+
+style.css
+    É a aparência: cores, tamanhos, espaçamentos e layout.
+
+script.js
+    É o comportamento: neste projeto ele abre a janela de detalhes
+    dos projetos.
+
+imagens/
+    Coloque aqui as fotos do grupo.
+
+videos/
+    Coloque aqui os vídeos do grupo.
+
+
+COMO ABRIR
+----------
+
+1. Extraia o arquivo ZIP.
+2. Abra a pasta.
+3. Clique duas vezes em "index.html".
+4. O site abrirá no navegador.
+
+
+COMO PERSONALIZAR
+-----------------
+
+1. Troque os textos do index.html pelos acontecimentos reais do grupo.
+
+2. Para adicionar uma foto, coloque uma imagem dentro da pasta "imagens".
+   Exemplo:
+       imagens/foto-grupo.jpg
+
+   Depois podemos trocar o espaço de exemplo por:
+       <img src="imagens/foto-grupo.jpg" alt="Foto do grupo">
+
+
+3. Para colocar um vídeo local, coloque o arquivo dentro da pasta "videos".
+   Depois podemos usar:
+       <video controls>
+           <source src="videos/video.mp4" type="video/mp4">
+       </video>
+
+
+4. Para criar um novo registro no diário, copie um bloco <article class="post">
+   no index.html e altere o conteúdo.
+
+
+O QUE ESTUDAR ENQUANTO FAZEMOS
+-------------------------------
+
+HTML
+- section
+- article
+- div
+- h1, h2, h3
+- p
+- a
+- button
+- class
+- id
+- img
+- video
+
+CSS
+- seletor
+- propriedade
+- valor
+- class
+- id
+- margin
+- padding
+- border
+- background
+- grid
+- flex
+- media query
+
+JAVASCRIPT
+- const
+- função
+- parâmetro
+- querySelector
+- textContent
+- addEventListener
+- classList
+- if
+
+DESAFIOS PARA O GRUPO
+---------------------
+
+1. Trocar todos os textos de exemplo por informações reais.
+2. Colocar uma foto de cada integrante.
+3. Colocar uma foto do grupo.
+4. Adicionar um segundo registro no diário.
+5. Adicionar um novo projeto.
+6. Fazer um botão "Voltar ao topo".
+7. Fazer uma área com as disciplinas do semestre.
+8. Adicionar um vídeo.
+9. Alterar as cores do site.
+10. Tentar criar uma nova interação usando JavaScript.
+
+DICA
+----
+
+Não tentem aprender tudo de uma vez.
+
+Escolham uma parte do site e perguntem:
+"Qual código faz isso?"
+
+Depois mudem uma coisa por vez e vejam o resultado.
+
+HTML = estrutura
+CSS = aparência
+JavaScript = comportamento
