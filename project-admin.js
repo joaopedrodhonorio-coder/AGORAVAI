@@ -7,6 +7,11 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLI
 const modal = document.querySelector("#modal");
 const loginForm = document.querySelector("#loginForm");
 const emailAdmin = document.querySelector("#emailAdmin");
+const senhaAdmin = document.querySelector("#senhaAdmin");
+const linkAcesso = document.querySelector("#linkAcesso");
+const novaSenha = document.querySelector("#novaSenha");
+const confirmarSenha = document.querySelector("#confirmarSenha");
+const salvarSenha = document.querySelector("#salvarSenha");
 const authStatus = document.querySelector("#authStatus");
 const adminStatus = document.querySelector("#adminStatus");
 const diarioAdmin = document.querySelector("#diarioAdmin");
@@ -164,19 +169,44 @@ loginForm.addEventListener("submit", async (evento) => {
     evento.preventDefault();
     const email = emailAdmin.value.trim().toLowerCase();
     if (email !== EMAIL_ADMIN.toLowerCase()) {
-        authStatus.textContent = "Este e-mail não tem permissão para administrar os projetos.";
+        authStatus.textContent = "Este email nao tem permissao para administrar os projetos.";
         return;
     }
-    authStatus.textContent = "Enviando o link de acesso para seu e-mail...";
-    const { error } = await supabaseClient.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: window.location.href.split("#")[0] }
-    });
-    authStatus.textContent = error
-        ? `Não foi possível enviar o link: ${error.message}`
-        : "Link enviado. Abra o e-mail e toque nele neste mesmo navegador para administrar os projetos.";
+    authStatus.textContent = "Validando email e senha...";
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password: senhaAdmin.value });
+    authStatus.textContent = error ? `Falha no login: ${error.message}` : "Acesso autorizado.";
 });
 
+linkAcesso.addEventListener("click", async () => {
+    const email = emailAdmin.value.trim().toLowerCase();
+    if (email !== EMAIL_ADMIN.toLowerCase()) {
+        authStatus.textContent = "Este email nao tem permissao para administrar os projetos.";
+        return;
+    }
+    authStatus.textContent = "Enviando link de primeiro acesso...";
+    const { error } = await supabaseClient.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href.split("#")[0] } });
+    authStatus.textContent = error ? `Falha ao enviar o link: ${error.message}` : "Link enviado. Abra-o neste navegador e defina sua senha no painel.";
+});
+
+salvarSenha.addEventListener("click", async () => {
+    if (!novaSenha.value || novaSenha.value.length < 8) {
+        adminStatus.textContent = "A senha precisa ter pelo menos 8 caracteres.";
+        novaSenha.focus();
+        return;
+    }
+    if (novaSenha.value !== confirmarSenha.value) {
+        adminStatus.textContent = "As senhas nao coincidem.";
+        confirmarSenha.focus();
+        return;
+    }
+    adminStatus.textContent = "Salvando senha...";
+    const { error } = await supabaseClient.auth.updateUser({ password: novaSenha.value });
+    adminStatus.textContent = error ? `Falha ao salvar a senha: ${error.message}` : "Senha definida. Nos proximos acessos, entre com email e senha.";
+    if (!error) {
+        novaSenha.value = "";
+        confirmarSenha.value = "";
+    }
+});
 document.querySelector("#sairAdmin").addEventListener("click", async () => {
     await supabaseClient.auth.signOut();
     atualizarAcesso(null);
