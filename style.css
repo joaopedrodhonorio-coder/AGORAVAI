@@ -227,6 +227,15 @@ footer span {
     color: #9566ff;
 }
 
+.titulo-secao h2 .icone-conecta-reza {
+    display: inline-block;
+    width: 1.1em;
+    height: 1.1em;
+    margin-left: 0.08em;
+    object-fit: contain;
+    vertical-align: -0.15em;
+}
+
 .introducao {
     max-width: 720px;
     color: #aaa7b9;
