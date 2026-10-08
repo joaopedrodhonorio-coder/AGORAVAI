@@ -444,10 +444,20 @@ footer span {
 .projeto-resumo-desfocado {
     max-height: 8.5em;
     overflow: hidden;
-    filter: blur(3px);
-    opacity: 0.72;
+    position: relative;
+    filter: blur(9px);
+    opacity: 0.62;
     -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
     mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
+}
+
+.projeto-resumo-desfocado::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse at 35% 55%, rgba(221, 211, 255, 0.36), transparent 72%),
+        linear-gradient(180deg, rgba(18, 16, 29, 0.12), rgba(18, 16, 29, 0.68));
 }
 
 #projetos > .projetos[hidden] {
@@ -636,6 +646,17 @@ footer strong {
     color: #aaa7b9;
     white-space: pre-wrap;
     line-height: 1.7;
+}
+
+.modal-topico {
+    display: block;
+    margin: 1em 0 0.25em;
+    color: #fff;
+    font-weight: 800;
+}
+
+.modal-topico:first-child {
+    margin-top: 0;
 }
 
 .fechar {

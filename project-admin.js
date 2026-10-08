@@ -43,7 +43,22 @@ function mostrarProjeto(titulo, texto) {
         .replace(/\s*\*\s*/g, "\n• ")
         .replace(/\s*(O que fizemos\?|Ideias que surgiram:?|O que decidimos\?|Dificuldades que tivemos:?|Pr[oó]ximo passo:?|O que pretendemos detectar\?|Resposta do sistema:?|Como funcionar[aá]\?)\s*/giu, "\n\n$1\n")
         .replace(/\n{3,}/g, "\n\n");
-    document.querySelector("#modalTexto").textContent = textoLegivel;
+    const topicos = /(O que fizemos\?|Ideias que surgiram:?|O que decidimos\?|Dificuldades que tivemos:?|Pr[o\u00F3]ximo passo:?|O que pretendemos detectar\?|Resposta do sistema:?|Como funcionar[a\u00E1]\?|Detec[c\u00E7][a\u00E3]o de objetos)/giu;
+    const modalTexto = document.querySelector("#modalTexto");
+    modalTexto.replaceChildren();
+    let inicio = 0;
+    let topico;
+    while ((topico = topicos.exec(textoLegivel)) !== null) {
+        const antes = textoLegivel.slice(inicio, topico.index).trim();
+        if (antes) modalTexto.append(document.createTextNode(antes));
+        const destaque = document.createElement("strong");
+        destaque.className = "modal-topico";
+        destaque.textContent = topico[0];
+        modalTexto.append(destaque);
+        inicio = topico.index + topico[0].length;
+    }
+    const restante = textoLegivel.slice(inicio).trim();
+    if (restante) modalTexto.append(document.createTextNode(restante));
     modal.classList.add("aberto");
 }
 
