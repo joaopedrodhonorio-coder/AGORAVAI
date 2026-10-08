@@ -289,8 +289,19 @@
             <h2>Nossos <strong>momentos.</strong></h2>
         </div>
 
+        <!-- Acesso privado para publicar trabalhos; a lista fica pública. -->
+        <form id="loginForm" class="diario-editor acesso-editor">
+            <label for="emailAdmin" class="editor-label">Acesso para publicar</label>
+            <div class="acesso-linha">
+                <input id="emailAdmin" type="email" autocomplete="email" placeholder="Seu e-mail" required>
+                <button type="submit" class="registrar-trabalho">Enviar link de acesso</button>
+            </div>
+            <p id="authStatus" class="auth-status" aria-live="polite">Somente a pessoa autorizada pode publicar.</p>
+        </form>
+
         <!-- ÁREA PARA ADICIONAR NOVOS TRABALHOS -->
-        <div class="diario-editor">
+        <div id="diarioAdmin" class="diario-editor" hidden>
+            <button id="sairAdmin" class="cancelar-trabalho" type="button">Sair</button>
             <button class="adicionar-trabalho" id="abrirEditor" type="button">
                 + Adicionar resumo do trabalho 1
             </button>
@@ -352,7 +363,8 @@
 
 
     <!-- Nosso JavaScript -->
-    <script src="script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="cloud-script.js"></script>
 
 </body>
 </html>

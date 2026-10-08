@@ -657,6 +657,42 @@ footer strong {
     font-weight: 700;
 }
 
+.acesso-editor {
+    margin-bottom: 24px;
+}
+
+.acesso-linha {
+    display: flex;
+    gap: 10px;
+}
+
+#emailAdmin {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #493a72;
+    border-radius: 12px;
+    background: #0d0b16;
+    color: #fff;
+    font: inherit;
+}
+
+.auth-status {
+    margin: 10px 0 0;
+    color: #b6b0c3;
+    font-size: 14px;
+}
+
+#sairAdmin {
+    margin-bottom: 14px;
+}
+
+@media (max-width: 650px) {
+    .acesso-linha {
+        flex-direction: column;
+    }
+}
+
 #resumoTrabalho {
     width: 100%;
     min-height: 120px;
