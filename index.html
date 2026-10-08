@@ -295,17 +295,29 @@
         <!-- Acesso privado para publicar trabalhos; a lista fica pública. -->
         <form id="loginForm" class="diario-editor acesso-editor">
             <label for="emailAdmin" class="editor-label">Acesso para administrar os projetos</label>
+            <input id="emailAdmin" type="email" autocomplete="email" placeholder="Seu e-mail" required>
+            <label for="senhaAdmin" class="editor-label">Senha</label>
+            <input id="senhaAdmin" type="password" autocomplete="current-password" placeholder="Sua senha" required>
             <div class="acesso-linha">
-                <input id="emailAdmin" type="email" autocomplete="email" placeholder="Seu e-mail" required>
-                <button type="submit" class="registrar-trabalho">Enviar link de acesso</button>
+                <button type="submit" class="registrar-trabalho">Entrar</button>
+                <button id="linkAcesso" type="button" class="cancelar-trabalho">Primeiro acesso? Enviar link</button>
             </div>
-            <p id="authStatus" class="auth-status" aria-live="polite">Somente a pessoa autorizada pode publicar.</p>
+            <p id="authStatus" class="auth-status" aria-live="polite">No primeiro acesso, confirme seu e-mail pelo link e defina uma senha.</p>
         </form>
 
         <!-- ÁREA PARA ADICIONAR NOVOS TRABALHOS -->
         <div id="diarioAdmin" class="diario-editor" hidden>
             <button id="sairAdmin" class="cancelar-trabalho" type="button">Sair</button>
             <p id="adminStatus" class="auth-status" aria-live="polite"></p>
+            <div class="senha-admin">
+                <h3>Senha de acesso</h3>
+                <p>Defina uma senha para entrar nas próximas vezes sem receber um link por e-mail.</p>
+                <label for="novaSenha" class="editor-label">Nova senha</label>
+                <input id="novaSenha" type="password" minlength="8" autocomplete="new-password" placeholder="Pelo menos 8 caracteres">
+                <label for="confirmarSenha" class="editor-label">Confirme a nova senha</label>
+                <input id="confirmarSenha" type="password" minlength="8" autocomplete="new-password" placeholder="Repita a senha">
+                <button id="salvarSenha" class="cancelar-trabalho" type="button">Salvar senha</button>
+            </div>
             <button class="adicionar-trabalho" id="abrirEditor" type="button">
                 + Adicionar projeto
             </button>
@@ -372,6 +384,7 @@
     <!-- Nosso JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="project-admin.js"></script>
+    <script src="password-auth.js"></script>
 
 </body>
 </html>

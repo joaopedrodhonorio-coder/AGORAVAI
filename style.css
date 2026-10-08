@@ -724,7 +724,10 @@ footer strong {
     gap: 10px;
 }
 
-#emailAdmin {
+#emailAdmin,
+#senhaAdmin,
+#novaSenha,
+#confirmarSenha {
     flex: 1;
     min-width: 0;
     padding: 12px 14px;
@@ -739,6 +742,32 @@ footer strong {
     margin: 10px 0 0;
     color: #b6b0c3;
     font-size: 14px;
+}
+
+.senha-admin {
+    max-width: 850px;
+    margin: 12px 0 24px;
+    padding: 20px;
+    border: 1px solid #33294d;
+    border-radius: 16px;
+    background: #100e1b;
+}
+
+.senha-admin h3 {
+    margin: 0 0 8px;
+    color: #fff;
+}
+
+.senha-admin p {
+    margin: 0 0 16px;
+    color: #b6b0c3;
+}
+
+.senha-admin input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 14px;
 }
 
 #sairAdmin {
