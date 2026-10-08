@@ -101,7 +101,15 @@ function criarCardProjeto(projeto) {
     const titulo = document.createElement("h3");
     titulo.textContent = projeto.titulo || `Projeto ${projeto.numero}`;
     const resumo = document.createElement("p");
-    resumo.textContent = projeto.resumo;
+    resumo.className = "projeto-resumo-preview";
+    const resumoClaro = document.createElement("span");
+    resumoClaro.className = "projeto-resumo-claro";
+    resumoClaro.textContent = projeto.resumo;
+    const resumoDesfocado = document.createElement("span");
+    resumoDesfocado.className = "projeto-resumo-desfocado";
+    resumoDesfocado.textContent = projeto.resumo;
+    resumoDesfocado.setAttribute("aria-hidden", "true");
+    resumo.append(resumoClaro, resumoDesfocado);
     const detalhes = document.createElement("button");
     detalhes.type = "button";
     detalhes.className = "ver-mais";

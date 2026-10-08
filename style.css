@@ -423,6 +423,33 @@ footer span {
     font-size: 14px;
 }
 
+.projeto-resumo-preview {
+    display: grid;
+    line-height: 1.7;
+}
+
+.projeto-resumo-preview > span {
+    grid-area: 1 / 1;
+}
+
+.projeto-resumo-claro {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+}
+
+.projeto-resumo-desfocado {
+    max-height: 8.5em;
+    overflow: hidden;
+    filter: blur(3px);
+    opacity: 0.72;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
+    mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
+}
+
 #projetos > .projetos[hidden] {
     display: none;
 }
