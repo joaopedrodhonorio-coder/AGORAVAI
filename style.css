@@ -596,6 +596,8 @@ footer strong {
     border-radius: 22px;
     padding: 35px;
     position: relative;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
 }
 
 .modal-caixa h2 {
@@ -605,6 +607,8 @@ footer strong {
 
 .modal-caixa p {
     color: #aaa7b9;
+    white-space: pre-wrap;
+    line-height: 1.7;
 }
 
 .fechar {

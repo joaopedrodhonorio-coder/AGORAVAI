@@ -39,7 +39,8 @@ videoTexto.textContent = "Adicionar vídeos";
 
 function mostrarProjeto(titulo, texto) {
     document.querySelector("#modalTitulo").textContent = titulo;
-    document.querySelector("#modalTexto").textContent = texto;
+    const textoLegivel = String(texto || "").trim().replace(/\s*(O que fizemos\?|Ideias que surgiram|O que decidimos\?|Dificuldades que tivemos:?|Pr[oó]ximo passo:?|O que pretendemos detectar\?|Resposta do sistema:?|Como funcionar[aá]\?)\s*/giu, "\n\n$1\n");
+    document.querySelector("#modalTexto").textContent = textoLegivel;
     modal.classList.add("aberto");
 }
 
