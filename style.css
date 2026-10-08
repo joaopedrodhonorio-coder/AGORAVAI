@@ -424,40 +424,10 @@ footer span {
 }
 
 .projeto-resumo-preview {
-    display: grid;
-    line-height: 1.7;
-}
-
-.projeto-resumo-preview > span {
-    grid-area: 1 / 1;
-}
-
-.projeto-resumo-claro {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     overflow: hidden;
-    position: relative;
-    z-index: 1;
-}
-
-.projeto-resumo-desfocado {
-    max-height: 8.5em;
-    overflow: hidden;
-    position: relative;
-    filter: blur(9px);
-    opacity: 0.62;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
-    mask-image: linear-gradient(to bottom, transparent 0, transparent 3.4em, #000 4em);
-}
-
-.projeto-resumo-desfocado::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse at 35% 55%, rgba(221, 211, 255, 0.36), transparent 72%),
-        linear-gradient(180deg, rgba(18, 16, 29, 0.12), rgba(18, 16, 29, 0.68));
 }
 
 #projetos > .projetos[hidden] {
