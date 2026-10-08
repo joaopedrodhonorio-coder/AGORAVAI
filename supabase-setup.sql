@@ -37,7 +37,7 @@ begin
             (1, 'Nosso primeiro site', 'Aqui vamos contar como foi criar nosso primeiro projeto e quais foram as dificuldades encontradas.'),
             (2, 'Em construção...', 'Um novo projeto será adicionado aqui conforme nossa jornada avançar.');
     end if;
-end
+end;
 $$;
 
 alter table public.trabalhos enable row level security;
