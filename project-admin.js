@@ -27,9 +27,17 @@ const videoInput = document.querySelector("#videoInput");
 const fotoTexto = document.querySelector("#fotoTexto");
 const videoTexto = document.querySelector("#videoTexto");
 const salvarProjetoBotao = document.querySelector("#registrarTrabalho");
+const tipoConteudo = document.querySelector("#tipoConteudo");
+const projetoPai = document.querySelector("#projetoPai");
+const projetoPaiCampo = document.querySelector("#projetoPaiCampo");
+const linhaDoTempo = document.querySelector("#linhaDoTempo");
+const timelineBotoes = document.querySelector("#timelineBotoes");
+const timelineConteudo = document.querySelector("#timelineConteudo");
 
 let projetosCarregados = [];
 let projetoEmEdicao = null;
+let atualizacaoEmEdicao = null;
+let atualizacoesCarregadas = {};
 let administradorAtivo = false;
 
 document.querySelector("#projetos").append(listaProjetos, projetosVazio);
@@ -37,7 +45,7 @@ salvarProjetoBotao.textContent = "Salvar projeto";
 fotoTexto.textContent = "Adicionar fotos";
 videoTexto.textContent = "Adicionar vídeos";
 
-function mostrarProjeto(titulo, texto) {
+function mostrarProjeto(titulo, texto, atualizacoes = []) {
     document.querySelector("#modalTitulo").textContent = titulo;
     const textoLegivel = String(texto || "").trim()
         .replace(/\s*\*\s*/g, "\n• ")
@@ -59,7 +67,47 @@ function mostrarProjeto(titulo, texto) {
     }
     const restante = textoLegivel.slice(inicio).trim();
     if (restante) modalTexto.append(document.createTextNode(restante));
+    modalTexto.after(linhaDoTempo);
+    linhaDoTempo.hidden = atualizacoes.length === 0;
+    timelineBotoes.replaceChildren();
+    timelineConteudo.replaceChildren();
+    atualizacoes.forEach((atualizacao, indice) => {
+        const botao = document.createElement("button");
+        botao.type = "button";
+        botao.className = "timeline-botao";
+        botao.textContent = indice === 0 ? "Projeto" : `Atualização ${indice}`;
+        botao.addEventListener("click", () => mostrarAtualizacao(atualizacao, botao));
+        timelineBotoes.append(botao);
+    });
+    if (atualizacoes.length) mostrarAtualizacao(atualizacoes[0], timelineBotoes.firstElementChild);
     modal.classList.add("aberto");
+}
+
+function mostrarAtualizacao(atualizacao, botaoAtivo) {
+    timelineBotoes.querySelectorAll("button").forEach((botao) => botao.classList.toggle("ativo", botao === botaoAtivo));
+    timelineConteudo.replaceChildren();
+    const titulo = document.createElement("h4");
+    titulo.textContent = atualizacao.titulo;
+    const data = document.createElement("time");
+    data.textContent = new Date(atualizacao.created_at).toLocaleDateString("pt-BR");
+    const texto = document.createElement("p");
+    texto.textContent = atualizacao.resumo;
+    const midias = document.createElement("div");
+    midias.className = "diario-trabalho-midias";
+    listaDeCaminhos(atualizacao.foto_paths).forEach((caminho) => {
+        const imagem = document.createElement("img");
+        imagem.src = urlMidia(caminho);
+        imagem.alt = `Foto da atualização ${atualizacao.titulo}`;
+        midias.append(imagem);
+    });
+    listaDeCaminhos(atualizacao.video_paths).forEach((caminho) => {
+        const video = document.createElement("video");
+        video.src = urlMidia(caminho);
+        video.controls = true;
+        midias.append(video);
+    });
+    timelineConteudo.append(titulo, data, texto);
+    if (midias.childElementCount) timelineConteudo.append(midias);
 }
 
 function fecharProjeto() {
@@ -122,7 +170,7 @@ function criarCardProjeto(projeto) {
     detalhes.type = "button";
     detalhes.className = "ver-mais";
     detalhes.textContent = "Ver apresentação →";
-    detalhes.addEventListener("click", () => mostrarProjeto(titulo.textContent, projeto.resumo));
+    detalhes.addEventListener("click", () => mostrarProjeto(titulo.textContent, projeto.resumo, [projeto, ...(atualizacoesCarregadas[projeto.id] || [])]));
     conteudo.append(etiqueta, titulo, resumo, detalhes);
     card.append(midias, conteudo);
     listaProjetos.appendChild(card);
@@ -150,8 +198,31 @@ function criarLinhaGerenciamento(projeto) {
     remover.className = "cancelar-trabalho";
     remover.textContent = "Remover";
     remover.addEventListener("click", () => removerProjeto(projeto));
-    acoes.append(editar, remover);
+    const adicionarAtualizacao = document.createElement("button");
+    adicionarAtualizacao.type = "button";
+    adicionarAtualizacao.className = "cancelar-trabalho";
+    adicionarAtualizacao.textContent = "Adicionar atualização";
+    adicionarAtualizacao.addEventListener("click", () => abrirAtualizacao(projeto));
+    acoes.append(editar, adicionarAtualizacao, remover);
     item.append(informacoes, acoes);
+    (atualizacoesCarregadas[projeto.id] || []).forEach((atualizacao, indice) => {
+        const etapa = document.createElement("div");
+        etapa.className = "admin-atualizacao-item";
+        const nome = document.createElement("span");
+        nome.textContent = `Atualização ${indice + 1}: ${atualizacao.titulo}`;
+        const editarEtapa = document.createElement("button");
+        editarEtapa.type = "button";
+        editarEtapa.className = "cancelar-trabalho";
+        editarEtapa.textContent = "Editar atualização";
+        editarEtapa.addEventListener("click", () => abrirAtualizacao(projeto, atualizacao));
+        const excluirEtapa = document.createElement("button");
+        excluirEtapa.type = "button";
+        excluirEtapa.className = "cancelar-trabalho";
+        excluirEtapa.textContent = "Remover";
+        excluirEtapa.addEventListener("click", () => removerAtualizacao(projeto, atualizacao));
+        etapa.append(nome, editarEtapa, excluirEtapa);
+        item.append(etapa);
+    });
     listaTrabalhos.appendChild(item);
 }
 
@@ -167,6 +238,24 @@ async function carregarProjetos() {
         return;
     }
     projetosCarregados = data || [];
+    const resultadoAtualizacoes = await supabaseClient.from("atualizacoes_trabalhos")
+        .select("id, trabalho_id, titulo, resumo, foto_paths, video_paths, created_at")
+        .order("created_at", { ascending: true });
+    atualizacoesCarregadas = {};
+    if (resultadoAtualizacoes.error) {
+        console.warn("Histórico indisponível. Execute a migração SQL atualizada.", resultadoAtualizacoes.error);
+        if (administradorAtivo) adminStatus.textContent = "Para ativar o histórico interativo, execute a versão atualizada de supabase-setup.sql no Supabase.";
+    } else {
+        (resultadoAtualizacoes.data || []).forEach((atualizacao) => {
+            (atualizacoesCarregadas[atualizacao.trabalho_id] ||= []).push(atualizacao);
+        });
+    }
+    projetoPai.replaceChildren(...projetosCarregados.map((projeto) => {
+        const opcao = document.createElement("option");
+        opcao.value = projeto.id;
+        opcao.textContent = projeto.titulo;
+        return opcao;
+    }));
     listaProjetos.replaceChildren();
     listaTrabalhos.replaceChildren();
     projetosCarregados.forEach(criarCardProjeto);
@@ -238,6 +327,7 @@ supabaseClient.auth.getSession().then(({ data }) => atualizarAcesso(data.session
 
 function limparEditor() {
     projetoEmEdicao = null;
+    atualizacaoEmEdicao = null;
     tituloProjeto.value = "";
     resumoTrabalho.value = "";
     fotoInput.value = "";
@@ -245,6 +335,13 @@ function limparEditor() {
     fotoTexto.textContent = "Adicionar fotos";
     videoTexto.textContent = "Adicionar vídeos";
     salvarProjetoBotao.textContent = "Salvar projeto";
+    tipoConteudo.value = "projeto";
+    tipoConteudo.disabled = false;
+    projetoPaiCampo.hidden = true;
+    projetoPai.disabled = false;
+    document.querySelector("#tituloProjetoLabel").textContent = "Título do projeto";
+    document.querySelector("#resumoProjetoLabel").textContent = "Apresentação do projeto";
+    tituloProjeto.placeholder = "Nome do projeto";
 }
 
 function abrirFormulario(projeto = null) {
@@ -271,6 +368,25 @@ function editarProjeto(projeto) {
     editorConteudo.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
+function abrirAtualizacao(projeto, atualizacao = null) {
+    abrirFormulario();
+    tipoConteudo.value = "atualizacao";
+    tipoConteudo.disabled = Boolean(atualizacao);
+    projetoPaiCampo.hidden = false;
+    projetoPai.value = projeto.id;
+    projetoPai.disabled = Boolean(atualizacao);
+    atualizacaoEmEdicao = atualizacao;
+    document.querySelector("#tituloProjetoLabel").textContent = "Título desta atualização";
+    document.querySelector("#resumoProjetoLabel").textContent = "O que mudou nesta etapa?";
+    tituloProjeto.placeholder = "Ex.: Montagem do circuito";
+    salvarProjetoBotao.textContent = atualizacao ? "Salvar atualização" : "Publicar atualização";
+    if (atualizacao) {
+        tituloProjeto.value = atualizacao.titulo;
+        resumoTrabalho.value = atualizacao.resumo;
+    }
+    editorConteudo.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
 function fecharFormulario() {
     limparEditor();
     editorConteudo.hidden = true;
@@ -278,6 +394,12 @@ function fecharFormulario() {
 }
 
 abrirEditor.addEventListener("click", () => abrirFormulario());
+tipoConteudo.addEventListener("change", () => {
+    const ehAtualizacao = tipoConteudo.value === "atualizacao";
+    projetoPaiCampo.hidden = !ehAtualizacao;
+    document.querySelector("#tituloProjetoLabel").textContent = ehAtualizacao ? "Título desta atualização" : "Título do projeto";
+    document.querySelector("#resumoProjetoLabel").textContent = ehAtualizacao ? "O que mudou nesta etapa?" : "Apresentação do projeto";
+});
 document.querySelector("#cancelarTrabalho").addEventListener("click", fecharFormulario);
 
 fotoInput.addEventListener("change", () => {
@@ -311,6 +433,12 @@ async function enviarMidias(arquivos, pasta, carregados) {
 
 async function removerProjeto(projeto) {
     if (!window.confirm(`Remover o projeto “${projeto.titulo}”? Essa ação não pode ser desfeita.`)) return;
+    const { data: atualizacoes, error: erroHistorico } = await supabaseClient.from("atualizacoes_trabalhos")
+        .select("foto_paths, video_paths").eq("trabalho_id", projeto.id);
+    if (erroHistorico) {
+        alert(`Não foi possível conferir as mídias das atualizações. ${erroHistorico.message}`);
+        return;
+    }
     const { error } = await supabaseClient.from("trabalhos").delete().eq("id", projeto.id);
     if (error) {
         alert(`Não foi possível remover o projeto. ${error.message}`);
@@ -318,17 +446,32 @@ async function removerProjeto(projeto) {
     }
     const midias = [
         ...listaDeCaminhos(projeto.foto_paths || projeto.foto_path),
-        ...listaDeCaminhos(projeto.video_paths || projeto.video_path)
+        ...listaDeCaminhos(projeto.video_paths || projeto.video_path),
+        ...(atualizacoes || []).flatMap((atualizacao) => [...listaDeCaminhos(atualizacao.foto_paths), ...listaDeCaminhos(atualizacao.video_paths)])
     ];
     if (midias.length) await supabaseClient.storage.from(BUCKET_TRABALHOS).remove(midias);
     adminStatus.textContent = "Projeto removido.";
     await carregarProjetos();
 }
 
+async function removerAtualizacao(projeto, atualizacao) {
+    if (!window.confirm(`Remover a atualização “${atualizacao.titulo}”?`)) return;
+    const { error } = await supabaseClient.from("atualizacoes_trabalhos").delete().eq("id", atualizacao.id);
+    if (error) {
+        alert(`Não foi possível remover a atualização. ${error.message}`);
+        return;
+    }
+    const midias = [...listaDeCaminhos(atualizacao.foto_paths), ...listaDeCaminhos(atualizacao.video_paths)];
+    if (midias.length) await supabaseClient.storage.from(BUCKET_TRABALHOS).remove(midias);
+    await carregarProjetos();
+    adminStatus.textContent = "Atualização removida.";
+}
+
 salvarProjetoBotao.addEventListener("click", async () => {
+    const ehAtualizacao = tipoConteudo.value === "atualizacao";
     const titulo = tituloProjeto.value.trim();
     const resumo = resumoTrabalho.value.trim();
-    if (!titulo || !resumo) {
+    if (!titulo || !resumo || (ehAtualizacao && !projetoPai.value)) {
         adminStatus.textContent = "Preencha o título e a apresentação do projeto.";
         (!titulo ? tituloProjeto : resumoTrabalho).focus();
         return;
@@ -349,6 +492,30 @@ salvarProjetoBotao.addEventListener("click", async () => {
         novosVideos = videoInput.files.length
             ? await enviarMidias([...videoInput.files], "videos", arquivosCarregados)
             : null;
+
+        if (ehAtualizacao) {
+            const editandoAtualizacao = Boolean(atualizacaoEmEdicao);
+            const valoresAtualizacao = {
+                trabalho_id: projetoPai.value,
+                titulo,
+                resumo,
+                foto_paths: novasFotos || listaDeCaminhos(atualizacaoEmEdicao?.foto_paths),
+                video_paths: novosVideos || listaDeCaminhos(atualizacaoEmEdicao?.video_paths)
+            };
+            const respostaAtualizacao = atualizacaoEmEdicao
+                ? await supabaseClient.from("atualizacoes_trabalhos").update(valoresAtualizacao).eq("id", atualizacaoEmEdicao.id)
+                : await supabaseClient.from("atualizacoes_trabalhos").insert(valoresAtualizacao);
+            if (respostaAtualizacao.error) throw respostaAtualizacao.error;
+            const antigas = [
+                ...(novasFotos ? listaDeCaminhos(atualizacaoEmEdicao?.foto_paths) : []),
+                ...(novosVideos ? listaDeCaminhos(atualizacaoEmEdicao?.video_paths) : [])
+            ];
+            if (antigas.length) await supabaseClient.storage.from(BUCKET_TRABALHOS).remove(antigas);
+            await carregarProjetos();
+            fecharFormulario();
+            adminStatus.textContent = editandoAtualizacao ? "Atualização editada." : "Atualização publicada dentro do projeto.";
+            return;
+        }
 
         const projeto = projetoEmEdicao;
         const valores = {

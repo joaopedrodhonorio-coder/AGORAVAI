@@ -319,6 +319,15 @@
             </button>
 
             <div class="editor-conteudo" id="editorConteudo" hidden>
+                <label for="tipoConteudo" class="editor-label">O que deseja publicar?</label>
+                <select id="tipoConteudo" class="editor-select">
+                    <option value="projeto">Novo projeto</option>
+                    <option value="atualizacao">Atualização de projeto</option>
+                </select>
+                <div id="projetoPaiCampo" hidden>
+                    <label for="projetoPai" class="editor-label">Projeto que receberá a atualização</label>
+                    <select id="projetoPai" class="editor-select"></select>
+                </div>
                 <label for="tituloProjeto" class="editor-label">Título do projeto</label>
                 <input id="tituloProjeto" type="text" maxlength="120" placeholder="Nome do projeto">
                 <label for="resumoTrabalho" class="editor-label">Apresentação do projeto</label>
@@ -370,6 +379,11 @@
 
             <span>PROJETO</span>
             <h2 id="modalTitulo">Projeto</h2>
+            <section id="linhaDoTempo" class="linha-do-tempo" hidden aria-label="Atualizações do projeto">
+                <h3>Etapas e atualizações</h3>
+                <div id="timelineBotoes" class="timeline-botoes"></div>
+                <div id="timelineConteudo" class="timeline-conteudo"></div>
+            </section>
             <p id="modalTexto">Descrição.</p>
 
         </div>

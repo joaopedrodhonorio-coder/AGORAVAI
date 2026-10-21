@@ -17,6 +17,39 @@ alter table public.trabalhos add column if not exists titulo text not null defau
 alter table public.trabalhos add column if not exists foto_paths text[] not null default array[]::text[];
 alter table public.trabalhos add column if not exists video_paths text[] not null default array[]::text[];
 
+create table if not exists public.atualizacoes_trabalhos (
+    id uuid primary key default gen_random_uuid(),
+    trabalho_id uuid not null references public.trabalhos(id) on delete cascade,
+    titulo text not null,
+    resumo text not null,
+    foto_paths text[] not null default array[]::text[],
+    video_paths text[] not null default array[]::text[],
+    created_at timestamptz not null default now()
+);
+
+create index if not exists atualizacoes_trabalhos_trabalho_id_created_at_idx
+    on public.atualizacoes_trabalhos (trabalho_id, created_at);
+alter table public.atualizacoes_trabalhos enable row level security;
+grant select on public.atualizacoes_trabalhos to anon, authenticated;
+grant insert, update, delete on public.atualizacoes_trabalhos to authenticated;
+
+drop policy if exists "Todos podem ver atualizacoes" on public.atualizacoes_trabalhos;
+create policy "Todos podem ver atualizacoes" on public.atualizacoes_trabalhos
+    for select to anon, authenticated using (true);
+drop policy if exists "Administrador pode publicar atualizacoes" on public.atualizacoes_trabalhos;
+create policy "Administrador pode publicar atualizacoes" on public.atualizacoes_trabalhos
+    for insert to authenticated
+    with check (lower((auth.jwt() ->> 'email')) = 'gabrielsoaresunia@gmail.com');
+drop policy if exists "Administrador pode editar atualizacoes" on public.atualizacoes_trabalhos;
+create policy "Administrador pode editar atualizacoes" on public.atualizacoes_trabalhos
+    for update to authenticated
+    using (lower((auth.jwt() ->> 'email')) = 'gabrielsoaresunia@gmail.com')
+    with check (lower((auth.jwt() ->> 'email')) = 'gabrielsoaresunia@gmail.com');
+drop policy if exists "Administrador pode remover atualizacoes" on public.atualizacoes_trabalhos;
+create policy "Administrador pode remover atualizacoes" on public.atualizacoes_trabalhos
+    for delete to authenticated
+    using (lower((auth.jwt() ->> 'email')) = 'gabrielsoaresunia@gmail.com');
+
 update public.trabalhos
 set foto_paths = array[foto_path]
 where foto_path is not null and cardinality(foto_paths) = 0;
