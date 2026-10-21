@@ -41,6 +41,7 @@ let projetoEmConversao = null;
 let atualizacoesCarregadas = {};
 let administradorAtivo = false;
 let aoFecharModal = null;
+let layoutProjetosEmColunas = null;
 
 document.querySelector("#projetos").append(listaProjetos, projetosVazio);
 salvarProjetoBotao.textContent = "Salvar projeto";
@@ -339,8 +340,35 @@ function criarCardProjeto(projeto) {
     else card.append(midias);
     card.append(conteudo);
     selecionarEtapa(etapaAtiva);
-    listaProjetos.appendChild(card);
+    return card;
 }
+
+function renderizarProjetos() {
+    const emTelaPequena = window.matchMedia("(max-width: 800px)").matches;
+    listaProjetos.replaceChildren();
+    if (emTelaPequena) {
+        projetosCarregados.forEach((projeto) => listaProjetos.append(criarCardProjeto(projeto)));
+    } else if (projetosCarregados.length) {
+        const colunas = [0, 1].map(() => {
+            const coluna = document.createElement("div");
+            coluna.className = "projetos-coluna";
+            return coluna;
+        });
+        listaProjetos.append(...colunas);
+        projetosCarregados.forEach((projeto, indice) => {
+            const indiceColuna = indice < 2
+                ? indice
+                : colunas[0].scrollHeight <= colunas[1].scrollHeight ? 0 : 1;
+            colunas[indiceColuna].append(criarCardProjeto(projeto));
+        });
+    }
+    layoutProjetosEmColunas = !emTelaPequena;
+}
+
+window.addEventListener("resize", () => {
+    const emColunas = !window.matchMedia("(max-width: 800px)").matches;
+    if (layoutProjetosEmColunas !== null && emColunas !== layoutProjetosEmColunas) renderizarProjetos();
+});
 
 function criarLinhaGerenciamento(projeto) {
     const item = document.createElement("article");
@@ -429,9 +457,8 @@ async function carregarProjetos() {
         opcao.textContent = projeto.titulo;
         return opcao;
     }));
-    listaProjetos.replaceChildren();
     listaTrabalhos.replaceChildren();
-    projetosCarregados.forEach(criarCardProjeto);
+    renderizarProjetos();
     if (administradorAtivo) projetosCarregados.forEach(criarLinhaGerenciamento);
     projetosVazio.hidden = projetosCarregados.length > 0;
 }
