@@ -432,6 +432,13 @@ footer span {
     font-size: 14px;
 }
 
+.projeto-etapa-data {
+    display: block;
+    margin: 8px 0;
+    color: #a46aff;
+    font-size: 13px;
+}
+
 .projeto-resumo-preview {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -986,24 +993,17 @@ footer strong {
     border-top: 1px solid #33294d;
 }
 
-.projeto-apresentacao-inline {
-    margin: 0 22px 24px;
-    padding: 22px;
-    border-top: 1px solid #33294d;
-    border-radius: 0 0 16px 16px;
-    background: linear-gradient(160deg, rgba(28, 20, 48, .72), rgba(12, 10, 20, .94));
-    animation: abrir-historico .28s ease-out both;
+.projeto-etapas {
+    padding: 16px 12px 0;
+    border-bottom: 1px solid #29243a;
+    background: linear-gradient(160deg, rgba(28, 20, 48, .55), rgba(12, 10, 20, .72));
 }
 
-@keyframes abrir-historico {
-    from { opacity: 0; transform: translateY(-8px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.projeto-apresentacao-inline > #modalTexto {
+.projeto-etapas h4 {
     margin: 0;
-    color: #c9c1da;
-    font-size: 15px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
 }
 
 .linha-do-tempo h3 {
@@ -1037,21 +1037,21 @@ footer strong {
     font: inherit;
     cursor: pointer;
     text-align: left;
-    transform: translateX(var(--card-x)) rotate(var(--card-rotate));
+    transform: translateX(var(--current-x, var(--card-x))) rotate(var(--card-rotate));
     transform-origin: 50% 115%;
     transition: transform .35s ease, box-shadow .35s ease, filter .35s ease;
 }
 
 .timeline-card:hover {
     filter: brightness(1.2);
-    transform: translateX(var(--card-x)) translateY(-12px) rotate(var(--card-rotate));
+    transform: translateX(var(--current-x, var(--card-x))) translateY(-12px) rotate(var(--card-rotate));
 }
 
 .timeline-card.ativo,
 .timeline-card.ativo:hover {
     border-color: #b58bff;
     box-shadow: 0 22px 44px rgba(93, 44, 183, .45);
-    transform: translateX(var(--card-x)) translateY(-25px) rotate(0) scale(1.08);
+    transform: translateX(var(--current-x, var(--card-x))) translateY(-25px) rotate(0) scale(1.08);
 }
 
 .timeline-card-numero {
@@ -1094,11 +1094,6 @@ footer strong {
 }
 
 @media (max-width: 650px) {
-    .projeto-apresentacao-inline {
-        margin: 0 12px 14px;
-        padding: 16px;
-    }
-
     .timeline-botoes {
         height: 195px;
         overflow: hidden;

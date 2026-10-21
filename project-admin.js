@@ -39,7 +39,6 @@ let projetoEmEdicao = null;
 let atualizacaoEmEdicao = null;
 let projetoEmConversao = null;
 let atualizacoesCarregadas = {};
-let apresentacaoInlineAtiva = null;
 let administradorAtivo = false;
 
 document.querySelector("#projetos").append(listaProjetos, projetosVazio);
@@ -103,30 +102,6 @@ function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null) 
     }
 }
 
-function fecharApresentacaoInline() {
-    if (!apresentacaoInlineAtiva) return;
-    const modalTitulo = document.querySelector("#modalTitulo");
-    modalTitulo.after(document.querySelector("#modalTexto"));
-    document.querySelector("#modalTexto").after(linhaDoTempo);
-    apresentacaoInlineAtiva.painel.remove();
-    apresentacaoInlineAtiva.botao.textContent = "Ver apresentação →";
-    apresentacaoInlineAtiva = null;
-}
-
-function abrirApresentacaoInline(card, projeto, botao) {
-    if (apresentacaoInlineAtiva?.card === card) {
-        fecharApresentacaoInline();
-        return;
-    }
-    fecharApresentacaoInline();
-    const painel = document.createElement("div");
-    painel.className = "projeto-apresentacao-inline";
-    card.append(painel);
-    apresentacaoInlineAtiva = { card, painel, botao };
-    botao.textContent = "Fechar apresentação ↑";
-    mostrarProjeto(projeto.titulo, projeto.resumo, [projeto, ...(atualizacoesCarregadas[projeto.id] || [])], painel);
-}
-
 function mostrarAtualizacao(atualizacao, botaoAtivo) {
     timelineBotoes.querySelectorAll("button").forEach((botao, indice) => {
         const ativo = botao === botaoAtivo;
@@ -175,52 +150,109 @@ function urlMidia(caminho) {
     return supabaseClient.storage.from(BUCKET_TRABALHOS).getPublicUrl(caminho).data.publicUrl;
 }
 
-function criarCardProjeto(projeto) {
-    const card = document.createElement("article");
-    card.className = "projeto";
-
-    const midias = document.createElement("div");
-    midias.className = "projeto-midias";
-    const fotos = listaDeCaminhos(projeto.foto_paths || projeto.foto_path);
-    const videos = listaDeCaminhos(projeto.video_paths || projeto.video_path);
-
+function preencherMidiasProjeto(midias, etapa, projeto) {
+    midias.replaceChildren();
+    const fotos = listaDeCaminhos(etapa.foto_paths || etapa.foto_path);
+    const videos = listaDeCaminhos(etapa.video_paths || etapa.video_path);
     fotos.forEach((caminho) => {
         const imagem = document.createElement("img");
         imagem.src = urlMidia(caminho);
-        imagem.alt = `Foto do projeto ${projeto.titulo}`;
-        midias.appendChild(imagem);
+        imagem.alt = `Foto de ${etapa.titulo || projeto.titulo}`;
+        midias.append(imagem);
     });
     videos.forEach((caminho) => {
         const video = document.createElement("video");
         video.controls = true;
         video.preload = "metadata";
         video.src = urlMidia(caminho);
-        video.setAttribute("aria-label", `Vídeo do projeto ${projeto.titulo}`);
-        midias.appendChild(video);
+        video.setAttribute("aria-label", `Vídeo de ${etapa.titulo || projeto.titulo}`);
+        midias.append(video);
     });
     if (!midias.childElementCount) {
         const capa = document.createElement("div");
         capa.className = "projeto-imagem";
         capa.textContent = `PROJETO ${String(projeto.numero).padStart(2, "0")}`;
-        midias.appendChild(capa);
+        midias.append(capa);
     }
+}
+
+function criarCardProjeto(projeto) {
+    const card = document.createElement("article");
+    card.className = "projeto";
+    const etapas = [projeto, ...(atualizacoesCarregadas[projeto.id] || [])];
+    let etapaAtiva = etapas.length - 1;
+
+    const deck = document.createElement("section");
+    deck.className = "projeto-etapas";
+    const deckTitulo = document.createElement("h4");
+    deckTitulo.textContent = "Etapas e atualizações";
+    const cartas = document.createElement("div");
+    cartas.className = "timeline-botoes";
+    deck.append(deckTitulo, cartas);
+
+    const midias = document.createElement("div");
+    midias.className = "projeto-midias";
 
     const conteudo = document.createElement("div");
     conteudo.className = "projeto-conteudo";
     const etiqueta = document.createElement("span");
-    etiqueta.textContent = `PROJETO ${String(projeto.numero).padStart(2, "0")}`;
     const titulo = document.createElement("h3");
-    titulo.textContent = projeto.titulo || `Projeto ${projeto.numero}`;
     const resumo = document.createElement("p");
     resumo.className = "projeto-resumo-preview";
-    resumo.textContent = projeto.resumo;
+    const data = document.createElement("time");
+    data.className = "projeto-etapa-data";
     const detalhes = document.createElement("button");
     detalhes.type = "button";
     detalhes.className = "ver-mais";
     detalhes.textContent = "Ver apresentação →";
-    detalhes.addEventListener("click", () => abrirApresentacaoInline(card, projeto, detalhes));
-    conteudo.append(etiqueta, titulo, resumo, detalhes);
+    const selecionarEtapa = (indice) => {
+        etapaAtiva = indice;
+        const etapa = etapas[indice];
+        etiqueta.textContent = indice === 0
+            ? `PROJETO ${String(projeto.numero).padStart(2, "0")}`
+            : `ATUALIZAÇÃO ${String(indice).padStart(2, "0")}`;
+        titulo.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
+        resumo.textContent = etapa.resumo || "";
+        data.textContent = etapa.created_at ? new Date(etapa.created_at).toLocaleDateString("pt-BR") : "";
+        preencherMidiasProjeto(midias, etapa, projeto);
+        cartas.querySelectorAll(".timeline-card").forEach((carta, cartaIndice) => {
+            const ativa = cartaIndice === indice;
+            carta.classList.toggle("ativo", ativa);
+            carta.style.zIndex = ativa ? "100" : String(cartaIndice + 1);
+            carta.style.setProperty("--current-x", ativa ? "0px" : carta.dataset.x);
+        });
+    };
+
+    if (etapas.length > 1) {
+        const espacamento = Math.min(36, Math.max(8, (320 - 150) / (etapas.length - 1)));
+        etapas.forEach((etapa, indice) => {
+            const carta = document.createElement("button");
+            carta.type = "button";
+            carta.className = "timeline-card";
+            carta.dataset.x = `${(indice - (etapas.length - 1) / 2) * espacamento}px`;
+            carta.style.setProperty("--card-x", carta.dataset.x);
+            carta.style.setProperty("--current-x", carta.dataset.x);
+            carta.style.setProperty("--card-rotate", `${(indice - (etapas.length - 1) / 2) * 5}deg`);
+            carta.style.zIndex = String(indice + 1);
+            const numero = document.createElement("span");
+            numero.className = "timeline-card-numero";
+            numero.textContent = indice === 0 ? "PROJETO" : `ETAPA ${String(indice).padStart(2, "0")}`;
+            const tituloCarta = document.createElement("strong");
+            tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
+            carta.append(numero, tituloCarta);
+            carta.setAttribute("aria-label", `Mostrar ${numero.textContent}: ${etapa.titulo || projeto.titulo}`);
+            carta.addEventListener("click", () => selecionarEtapa(indice));
+            cartas.append(carta);
+        });
+    }
+    detalhes.addEventListener("click", () => {
+        const etapa = etapas[etapaAtiva];
+        mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", []);
+    });
+    conteudo.append(etiqueta, titulo, data, resumo, detalhes);
+    if (etapas.length > 1) card.append(deck);
     card.append(midias, conteudo);
+    selecionarEtapa(etapaAtiva);
     listaProjetos.appendChild(card);
 }
 
