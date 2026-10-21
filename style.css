@@ -992,27 +992,63 @@ footer strong {
 }
 
 .timeline-botoes {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    padding: 4px 2px 12px;
+    position: relative;
+    width: min(100%, 650px);
+    height: 220px;
+    margin: 6px auto 18px;
 }
 
-.timeline-botao {
-    flex: 0 0 auto;
-    padding: 9px 14px;
-    border: 1px solid #493a72;
-    border-radius: 999px;
-    background: #0d0b16;
-    color: #c9c1da;
+.timeline-card {
+    position: absolute;
+    left: calc(50% - 72px);
+    bottom: 12px;
+    display: flex;
+    width: 144px;
+    height: 174px;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px 14px;
+    border: 1px solid #7555bb;
+    border-radius: 16px;
+    background: linear-gradient(150deg, #271746, #100d1d 72%);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, .4);
+    color: #f5f0ff;
     font: inherit;
     cursor: pointer;
+    text-align: left;
+    transform: translateX(var(--card-x)) rotate(var(--card-rotate));
+    transform-origin: 50% 115%;
+    transition: transform .35s ease, box-shadow .35s ease, filter .35s ease;
 }
 
-.timeline-botao.ativo {
-    border-color: #9a62ff;
-    background: #7b3ff2;
+.timeline-card:hover {
+    filter: brightness(1.2);
+    transform: translateX(var(--card-x)) translateY(-12px) rotate(var(--card-rotate));
+}
+
+.timeline-card.ativo,
+.timeline-card.ativo:hover {
+    border-color: #b58bff;
+    box-shadow: 0 22px 44px rgba(93, 44, 183, .45);
+    transform: translateX(var(--card-x)) translateY(-25px) rotate(0) scale(1.08);
+}
+
+.timeline-card-numero {
+    color: #b889ff;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+}
+
+.timeline-card strong {
+    display: -webkit-box;
+    overflow: hidden;
     color: #fff;
+    font-size: 16px;
+    line-height: 1.35;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
 }
 
 .timeline-conteudo {
@@ -1035,4 +1071,18 @@ footer strong {
 
 .timeline-conteudo p {
     white-space: pre-wrap;
+}
+
+@media (max-width: 650px) {
+    .timeline-botoes {
+        height: 195px;
+        overflow: hidden;
+    }
+
+    .timeline-card {
+        left: calc(50% - 62px);
+        width: 124px;
+        height: 156px;
+        padding: 13px 11px;
+    }
 }

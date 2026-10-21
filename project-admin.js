@@ -72,11 +72,23 @@ function mostrarProjeto(titulo, texto, atualizacoes = []) {
     linhaDoTempo.hidden = atualizacoes.length === 0;
     timelineBotoes.replaceChildren();
     timelineConteudo.replaceChildren();
+    const espalhamento = atualizacoes.length > 1
+        ? Math.min(38, Math.max(15, (timelineBotoes.clientWidth - 150) / (atualizacoes.length - 1)))
+        : 0;
     atualizacoes.forEach((atualizacao, indice) => {
         const botao = document.createElement("button");
         botao.type = "button";
-        botao.className = "timeline-botao";
-        botao.textContent = indice === 0 ? "Projeto" : `Atualização ${indice}`;
+        botao.className = "timeline-card";
+        botao.style.setProperty("--card-x", `${(indice - (atualizacoes.length - 1) / 2) * espalhamento}px`);
+        botao.style.setProperty("--card-rotate", `${(indice - (atualizacoes.length - 1) / 2) * 5}deg`);
+        botao.style.zIndex = String(indice + 1);
+        const numero = document.createElement("span");
+        numero.className = "timeline-card-numero";
+        numero.textContent = indice === 0 ? "PROJETO" : `ETAPA ${String(indice).padStart(2, "0")}`;
+        const tituloCard = document.createElement("strong");
+        tituloCard.textContent = atualizacao.titulo;
+        botao.append(numero, tituloCard);
+        botao.setAttribute("aria-label", `Abrir ${numero.textContent}: ${atualizacao.titulo}`);
         botao.addEventListener("click", () => mostrarAtualizacao(atualizacao, botao));
         timelineBotoes.append(botao);
     });
@@ -85,7 +97,11 @@ function mostrarProjeto(titulo, texto, atualizacoes = []) {
 }
 
 function mostrarAtualizacao(atualizacao, botaoAtivo) {
-    timelineBotoes.querySelectorAll("button").forEach((botao) => botao.classList.toggle("ativo", botao === botaoAtivo));
+    timelineBotoes.querySelectorAll("button").forEach((botao, indice) => {
+        const ativo = botao === botaoAtivo;
+        botao.classList.toggle("ativo", ativo);
+        botao.style.zIndex = ativo ? "100" : String(indice + 1);
+    });
     timelineConteudo.replaceChildren();
     const titulo = document.createElement("h4");
     titulo.textContent = atualizacao.titulo;
