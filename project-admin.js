@@ -200,7 +200,7 @@ function preencherMidiasProjeto(midias, etapa, projeto) {
     if (!midias.childElementCount) {
         const capa = document.createElement("div");
         capa.className = "projeto-imagem";
-        capa.textContent = `PROJETO ${String(projeto.numero).padStart(2, "0")}`;
+        capa.textContent = `PROJETO ${String(projeto.numeroExibicao || projeto.numero).padStart(2, "0")}`;
         midias.append(capa);
     }
 }
@@ -252,9 +252,9 @@ function criarCardProjeto(projeto) {
         const etapa = etapas[indice];
         etapaIndicador.textContent = `${indice + 1} de ${etapas.length}`;
         etiqueta.textContent = indice === 0
-            ? `PROJETO ${String(projeto.numero).padStart(2, "0")}`
+            ? `PROJETO ${String(projeto.numeroExibicao || projeto.numero).padStart(2, "0")}`
             : `ATUALIZAÇÃO ${String(indice).padStart(2, "0")}`;
-        titulo.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
+        titulo.textContent = etapa.titulo || `Projeto ${projeto.numeroExibicao || projeto.numero}`;
         resumo.textContent = etapa.resumo || "";
         data.textContent = etapa.created_at ? new Date(etapa.created_at).toLocaleDateString("pt-BR") : "";
         if (etapas.length === 1) preencherMidiasProjeto(midias, etapa, projeto);
@@ -304,7 +304,7 @@ function criarCardProjeto(projeto) {
                 carta.append(videoCarta);
             }
             const tituloCarta = document.createElement("strong");
-            tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
+            tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numeroExibicao || projeto.numero}`;
             botaoCarta.append(numero, tituloCarta);
             carta.append(botaoCarta);
             if (videoCapa) {
@@ -375,7 +375,7 @@ function criarLinhaGerenciamento(projeto) {
     item.className = "admin-projeto-item";
     const informacoes = document.createElement("div");
     const titulo = document.createElement("h4");
-    titulo.textContent = projeto.titulo || `Projeto ${projeto.numero}`;
+    titulo.textContent = projeto.titulo || `Projeto ${projeto.numeroExibicao || projeto.numero}`;
     const resumo = document.createElement("p");
     resumo.textContent = projeto.resumo;
     informacoes.append(titulo, resumo);
@@ -438,7 +438,7 @@ async function carregarProjetos() {
         if (adminStatus) adminStatus.textContent = `Falha ao carregar projetos: ${error.message || "motivo não informado"}`;
         return;
     }
-    projetosCarregados = data || [];
+    projetosCarregados = (data || []).map((projeto, indice) => ({ ...projeto, numeroExibicao: indice + 1 }));
     const resultadoAtualizacoes = await supabaseClient.from("atualizacoes_trabalhos")
         .select("id, trabalho_id, titulo, resumo, foto_paths, video_paths, created_at")
         .order("created_at", { ascending: true });
