@@ -214,7 +214,7 @@ function criarCardProjeto(projeto) {
         titulo.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
         resumo.textContent = etapa.resumo || "";
         data.textContent = etapa.created_at ? new Date(etapa.created_at).toLocaleDateString("pt-BR") : "";
-        preencherMidiasProjeto(midias, etapa, projeto);
+        if (etapas.length === 1) preencherMidiasProjeto(midias, etapa, projeto);
         cartas.querySelectorAll(".timeline-card").forEach((carta, cartaIndice) => {
             const ativa = cartaIndice === indice;
             carta.classList.toggle("ativo", ativa);
@@ -224,7 +224,7 @@ function criarCardProjeto(projeto) {
     };
 
     if (etapas.length > 1) {
-        const espacamento = Math.min(36, Math.max(8, (320 - 150) / (etapas.length - 1)));
+        const espacamento = Math.min(58, Math.max(20, (380 - 210) / (etapas.length - 1)));
         etapas.forEach((etapa, indice) => {
             const carta = document.createElement("button");
             carta.type = "button";
@@ -260,7 +260,8 @@ function criarCardProjeto(projeto) {
     });
     conteudo.append(etiqueta, titulo, data, resumo, detalhes);
     if (etapas.length > 1) card.append(deck);
-    card.append(midias, conteudo);
+    else card.append(midias);
+    card.append(conteudo);
     selecionarEtapa(etapaAtiva);
     listaProjetos.appendChild(card);
 }
