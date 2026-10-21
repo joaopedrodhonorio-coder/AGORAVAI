@@ -386,14 +386,17 @@ footer span {
 
 /* PROJETOS */
 .projetos {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 20px;
+    column-count: 2;
+    column-gap: 20px;
+    column-fill: balance;
     margin-top: 45px;
 }
 
 .projeto {
+    display: inline-block;
+    width: 100%;
+    margin: 0 0 20px;
+    break-inside: avoid;
     border: 1px solid #29243a;
     background: #0e0d18;
     border-radius: 22px;
@@ -720,9 +723,12 @@ footer strong {
         grid-template-columns: repeat(2, 1fr);
     }
 
-    .cards-progresso,
-    .projetos {
+    .cards-progresso {
         grid-template-columns: 1fr;
+    }
+
+    .projetos {
+        column-count: 1;
     }
 
     .post {
