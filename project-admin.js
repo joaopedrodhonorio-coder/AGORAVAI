@@ -237,6 +237,15 @@ function criarCardProjeto(projeto) {
             const numero = document.createElement("span");
             numero.className = "timeline-card-numero";
             numero.textContent = indice === 0 ? "PROJETO" : `ETAPA ${String(indice).padStart(2, "0")}`;
+            const fotoCapa = listaDeCaminhos(etapa.foto_paths || etapa.foto_path)[0];
+            if (fotoCapa) {
+                const imagemCarta = document.createElement("img");
+                imagemCarta.className = "timeline-card-foto";
+                imagemCarta.src = urlMidia(fotoCapa);
+                imagemCarta.alt = "";
+                imagemCarta.setAttribute("aria-hidden", "true");
+                carta.append(imagemCarta);
+            }
             const tituloCarta = document.createElement("strong");
             tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
             carta.append(numero, tituloCarta);

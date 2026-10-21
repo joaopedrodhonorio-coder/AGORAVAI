@@ -1042,6 +1042,31 @@ footer strong {
     transition: transform .35s ease, box-shadow .35s ease, filter .35s ease;
 }
 
+.timeline-card-foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    opacity: .62;
+    transition: opacity .3s ease;
+}
+
+.timeline-card::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(12, 9, 20, .18), rgba(12, 9, 20, .94));
+    content: "";
+}
+
+.timeline-card-numero,
+.timeline-card strong {
+    position: relative;
+    z-index: 1;
+}
+
 .timeline-card:hover {
     filter: brightness(1.2);
     transform: translateX(var(--current-x, var(--card-x))) translateY(-12px) rotate(var(--card-rotate));
@@ -1052,6 +1077,11 @@ footer strong {
     border-color: #b58bff;
     box-shadow: 0 22px 44px rgba(93, 44, 183, .45);
     transform: translateX(var(--current-x, var(--card-x))) translateY(-25px) rotate(0) scale(1.08);
+}
+
+.timeline-card.ativo .timeline-card-foto,
+.timeline-card:hover .timeline-card-foto {
+    opacity: .82;
 }
 
 .timeline-card-numero {
