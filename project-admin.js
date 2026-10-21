@@ -263,14 +263,16 @@ function criarCardProjeto(projeto) {
     if (etapas.length > 1) {
         const espacamento = Math.min(58, Math.max(20, (380 - 210) / (etapas.length - 1)));
         etapas.forEach((etapa, indice) => {
-            const carta = document.createElement("button");
-            carta.type = "button";
+            const carta = document.createElement("div");
             carta.className = "timeline-card";
             carta.dataset.x = `${(indice - (etapas.length - 1) / 2) * espacamento}px`;
             carta.style.setProperty("--card-x", carta.dataset.x);
             carta.style.setProperty("--current-x", carta.dataset.x);
             carta.style.setProperty("--card-rotate", `${(indice - (etapas.length - 1) / 2) * 5}deg`);
             carta.style.zIndex = String(indice + 1);
+            const botaoCarta = document.createElement("button");
+            botaoCarta.type = "button";
+            botaoCarta.className = "timeline-card-select";
             const numero = document.createElement("span");
             numero.className = "timeline-card-numero";
             numero.textContent = indice === 0 ? "PROJETO" : `ETAPA ${String(indice).padStart(2, "0")}`;
@@ -297,15 +299,21 @@ function criarCardProjeto(projeto) {
             }
             const tituloCarta = document.createElement("strong");
             tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
-            carta.append(numero, tituloCarta);
+            botaoCarta.append(numero, tituloCarta);
+            carta.append(botaoCarta);
             if (videoCapa) {
-                const seloVideo = document.createElement("span");
+                const seloVideo = document.createElement("button");
+                seloVideo.type = "button";
                 seloVideo.className = "timeline-card-video-badge";
                 seloVideo.textContent = "▶ VÍDEO";
+                seloVideo.setAttribute("aria-label", `Reproduzir vídeo de ${etapa.titulo || projeto.titulo}`);
+                seloVideo.addEventListener("click", () => {
+                    mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, { video_paths: [videoCapa] });
+                });
                 carta.append(seloVideo);
             }
-            carta.setAttribute("aria-label", `Mostrar ${numero.textContent}: ${etapa.titulo || projeto.titulo}`);
-            carta.addEventListener("click", () => selecionarEtapa(indice));
+            botaoCarta.setAttribute("aria-label", `Mostrar ${numero.textContent}: ${etapa.titulo || projeto.titulo}`);
+            botaoCarta.addEventListener("click", () => selecionarEtapa(indice));
             cartas.append(carta);
         });
         etapaAnterior.addEventListener("click", () => {

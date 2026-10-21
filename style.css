@@ -1149,9 +1149,37 @@ footer strong {
     border-radius: 999px;
     background: rgba(12, 9, 20, .76);
     color: #fff;
+    font: inherit;
     font-size: 10px;
     font-weight: 800;
     letter-spacing: .5px;
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease;
+}
+
+.timeline-card-video-badge:hover {
+    border-color: #fff;
+    background: rgba(92, 47, 178, .9);
+}
+
+.timeline-card-select {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
 }
 
 .timeline-card:hover {
@@ -1185,6 +1213,7 @@ footer strong {
 .timeline-card strong {
     display: -webkit-box;
     overflow: hidden;
+    margin-top: auto;
     color: #fff;
     font-size: 16px;
     line-height: 1.35;
@@ -1224,6 +1253,10 @@ footer strong {
         left: calc(50% - 100px);
         width: 200px;
         height: 240px;
+        padding: 13px 11px;
+    }
+
+    .timeline-card-select {
         padding: 13px 11px;
     }
 }
