@@ -40,13 +40,15 @@ let atualizacaoEmEdicao = null;
 let projetoEmConversao = null;
 let atualizacoesCarregadas = {};
 let administradorAtivo = false;
+let aoFecharModal = null;
 
 document.querySelector("#projetos").append(listaProjetos, projetosVazio);
 salvarProjetoBotao.textContent = "Salvar projeto";
 fotoTexto.textContent = "Adicionar fotos";
 videoTexto.textContent = "Adicionar vídeos";
 
-function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null, midiasApresentacao = null) {
+function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null, midiasApresentacao = null, aoFechar = null) {
+    aoFecharModal = aoFechar;
     document.querySelector("#modalTitulo").textContent = titulo;
     const textoLegivel = String(texto || "").trim()
         .replace(/\s*\*\s*/g, "\n• ")
@@ -158,6 +160,9 @@ function mostrarAtualizacao(atualizacao, botaoAtivo) {
 
 function fecharProjeto() {
     modal.classList.remove("aberto");
+    const callback = aoFecharModal;
+    aoFecharModal = null;
+    callback?.();
 }
 
 modal?.addEventListener("click", (evento) => {
@@ -308,7 +313,7 @@ function criarCardProjeto(projeto) {
                 seloVideo.textContent = "▶ VÍDEO";
                 seloVideo.setAttribute("aria-label", `Reproduzir vídeo de ${etapa.titulo || projeto.titulo}`);
                 seloVideo.addEventListener("click", () => {
-                    mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, { video_paths: [videoCapa] });
+                    mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, { video_paths: [videoCapa] }, () => selecionarEtapa(0));
                 });
                 carta.append(seloVideo);
             }
@@ -327,7 +332,7 @@ function criarCardProjeto(projeto) {
     }
     detalhes.addEventListener("click", () => {
         const etapa = etapas[etapaAtiva];
-        mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, etapa);
+        mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, etapa, () => selecionarEtapa(0));
     });
     conteudo.append(etiqueta, titulo, data, resumo, detalhes);
     if (etapas.length > 1) card.append(deck);
@@ -405,10 +410,7 @@ async function carregarProjetos() {
         if (adminStatus) adminStatus.textContent = `Falha ao carregar projetos: ${error.message || "motivo não informado"}`;
         return;
     }
-    projetosCarregados = (data || []).sort((a, b) => {
-        const prioridade = (projeto) => /sensor de proximidade/i.test(projeto.titulo || "") ? 0 : 1;
-        return prioridade(a) - prioridade(b) || (a.numero || 0) - (b.numero || 0);
-    });
+    projetosCarregados = data || [];
     const resultadoAtualizacoes = await supabaseClient.from("atualizacoes_trabalhos")
         .select("id, trabalho_id, titulo, resumo, foto_paths, video_paths, created_at")
         .order("created_at", { ascending: true });
