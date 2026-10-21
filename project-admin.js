@@ -37,6 +37,7 @@ const timelineConteudo = document.querySelector("#timelineConteudo");
 let projetosCarregados = [];
 let projetoEmEdicao = null;
 let atualizacaoEmEdicao = null;
+let projetoEmConversao = null;
 let atualizacoesCarregadas = {};
 let administradorAtivo = false;
 
@@ -203,7 +204,14 @@ function criarLinhaGerenciamento(projeto) {
     adicionarAtualizacao.className = "cancelar-trabalho";
     adicionarAtualizacao.textContent = "Adicionar atualização";
     adicionarAtualizacao.addEventListener("click", () => abrirAtualizacao(projeto));
-    acoes.append(editar, adicionarAtualizacao, remover);
+    const converter = document.createElement("button");
+    converter.type = "button";
+    converter.className = "cancelar-trabalho";
+    converter.textContent = "Converter em atualização";
+    converter.disabled = (atualizacoesCarregadas[projeto.id] || []).length > 0;
+    if (converter.disabled) converter.title = "Este projeto já tem atualizações; converta as etapas individualmente para preservar o histórico.";
+    converter.addEventListener("click", () => converterProjetoEmAtualizacao(projeto));
+    acoes.append(editar, adicionarAtualizacao, converter, remover);
     item.append(informacoes, acoes);
     (atualizacoesCarregadas[projeto.id] || []).forEach((atualizacao, indice) => {
         const etapa = document.createElement("div");
@@ -328,6 +336,7 @@ supabaseClient.auth.getSession().then(({ data }) => atualizarAcesso(data.session
 function limparEditor() {
     projetoEmEdicao = null;
     atualizacaoEmEdicao = null;
+    projetoEmConversao = null;
     tituloProjeto.value = "";
     resumoTrabalho.value = "";
     fotoInput.value = "";
@@ -384,6 +393,42 @@ function abrirAtualizacao(projeto, atualizacao = null) {
         tituloProjeto.value = atualizacao.titulo;
         resumoTrabalho.value = atualizacao.resumo;
     }
+    editorConteudo.scrollIntoView({ behavior: "smooth", block: "center" });
+}
+
+function converterProjetoEmAtualizacao(projeto) {
+    if ((atualizacoesCarregadas[projeto.id] || []).length) {
+        adminStatus.textContent = "Este projeto já tem atualizações. Para preservar o histórico, converta as etapas individualmente.";
+        return;
+    }
+    abrirFormulario();
+    projetoEmConversao = projeto;
+    tipoConteudo.value = "atualizacao";
+    tipoConteudo.disabled = true;
+    projetoPaiCampo.hidden = false;
+    projetoPai.replaceChildren(...projetosCarregados
+        .filter((item) => item.id !== projeto.id)
+        .map((item) => {
+            const opcao = document.createElement("option");
+            opcao.value = item.id;
+            opcao.textContent = item.titulo;
+            return opcao;
+        }));
+    projetoPai.value = projetoPai.options[0]?.value || "";
+    tituloProjeto.value = projeto.titulo || "";
+    resumoTrabalho.value = projeto.resumo || "";
+    document.querySelector("#tituloProjetoLabel").textContent = "Título da atualização";
+    document.querySelector("#resumoProjetoLabel").textContent = "Descrição da atualização";
+    fotoTexto.textContent = listaDeCaminhos(projeto.foto_paths || projeto.foto_path).length
+        ? "As fotos atuais serão mantidas (ou selecione outras)"
+        : "Adicionar fotos";
+    videoTexto.textContent = listaDeCaminhos(projeto.video_paths || projeto.video_path).length
+        ? "Os vídeos atuais serão mantidos (ou selecione outros)"
+        : "Adicionar vídeos";
+    salvarProjetoBotao.textContent = "Converter e salvar atualização";
+    adminStatus.textContent = projetosCarregados.length < 2
+        ? "É necessário haver outro projeto publicado para receber esta atualização."
+        : "Escolha o projeto de destino. O conteúdo e as mídias atuais serão reaproveitados.";
     editorConteudo.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
@@ -469,6 +514,7 @@ async function removerAtualizacao(projeto, atualizacao) {
 
 salvarProjetoBotao.addEventListener("click", async () => {
     const ehAtualizacao = tipoConteudo.value === "atualizacao";
+    if (projetoEmConversao && !window.confirm("Este projeto será removido da lista de cards e incluído como atualização do projeto escolhido. Texto e mídias serão mantidos. Continuar?")) return;
     const titulo = tituloProjeto.value.trim();
     const resumo = resumoTrabalho.value.trim();
     if (!titulo || !resumo || (ehAtualizacao && !projetoPai.value)) {
@@ -495,25 +541,35 @@ salvarProjetoBotao.addEventListener("click", async () => {
 
         if (ehAtualizacao) {
             const editandoAtualizacao = Boolean(atualizacaoEmEdicao);
+            const projetoConvertido = projetoEmConversao;
             const valoresAtualizacao = {
                 trabalho_id: projetoPai.value,
                 titulo,
                 resumo,
-                foto_paths: novasFotos || listaDeCaminhos(atualizacaoEmEdicao?.foto_paths),
-                video_paths: novosVideos || listaDeCaminhos(atualizacaoEmEdicao?.video_paths)
+                foto_paths: novasFotos || listaDeCaminhos(atualizacaoEmEdicao?.foto_paths || projetoConvertido?.foto_paths || projetoConvertido?.foto_path),
+                video_paths: novosVideos || listaDeCaminhos(atualizacaoEmEdicao?.video_paths || projetoConvertido?.video_paths || projetoConvertido?.video_path)
             };
-            const respostaAtualizacao = atualizacaoEmEdicao
+            const respostaAtualizacao = projetoConvertido
+                ? await supabaseClient.from("atualizacoes_trabalhos").insert(valoresAtualizacao).select("id").single()
+                : atualizacaoEmEdicao
                 ? await supabaseClient.from("atualizacoes_trabalhos").update(valoresAtualizacao).eq("id", atualizacaoEmEdicao.id)
                 : await supabaseClient.from("atualizacoes_trabalhos").insert(valoresAtualizacao);
             if (respostaAtualizacao.error) throw respostaAtualizacao.error;
+            if (projetoConvertido) {
+                const exclusaoProjeto = await supabaseClient.from("trabalhos").delete().eq("id", projetoConvertido.id);
+                if (exclusaoProjeto.error) {
+                    await supabaseClient.from("atualizacoes_trabalhos").delete().eq("id", respostaAtualizacao.data.id);
+                    throw exclusaoProjeto.error;
+                }
+            }
             const antigas = [
-                ...(novasFotos ? listaDeCaminhos(atualizacaoEmEdicao?.foto_paths) : []),
-                ...(novosVideos ? listaDeCaminhos(atualizacaoEmEdicao?.video_paths) : [])
+                ...(novasFotos ? listaDeCaminhos(atualizacaoEmEdicao?.foto_paths || projetoConvertido?.foto_paths || projetoConvertido?.foto_path) : []),
+                ...(novosVideos ? listaDeCaminhos(atualizacaoEmEdicao?.video_paths || projetoConvertido?.video_paths || projetoConvertido?.video_path) : [])
             ];
             if (antigas.length) await supabaseClient.storage.from(BUCKET_TRABALHOS).remove(antigas);
             await carregarProjetos();
             fecharFormulario();
-            adminStatus.textContent = editandoAtualizacao ? "Atualização editada." : "Atualização publicada dentro do projeto.";
+            adminStatus.textContent = projetoConvertido ? "Projeto convertido e incluído no histórico selecionado." : editandoAtualizacao ? "Atualização editada." : "Atualização publicada dentro do projeto.";
             return;
         }
 
