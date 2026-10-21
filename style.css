@@ -643,6 +643,23 @@ footer strong {
     line-height: 1.7;
 }
 
+.modal-midias {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.modal-midias img,
+.modal-midias video {
+    width: 100%;
+    max-height: 420px;
+    border: 1px solid #33294d;
+    border-radius: 12px;
+    background: #08070d;
+    object-fit: contain;
+}
+
 .modal-topico {
     display: block;
     margin: 1em 0 0.25em;
@@ -1097,6 +1114,17 @@ footer strong {
     transition: opacity .3s ease;
 }
 
+.timeline-card-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: inherit;
+    opacity: .72;
+    pointer-events: none;
+}
+
 .timeline-card::after {
     position: absolute;
     inset: 0;
@@ -1109,6 +1137,21 @@ footer strong {
 .timeline-card strong {
     position: relative;
     z-index: 1;
+}
+
+.timeline-card-video-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    padding: 5px 8px;
+    border: 1px solid rgba(255, 255, 255, .3);
+    border-radius: 999px;
+    background: rgba(12, 9, 20, .76);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
 }
 
 .timeline-card:hover {

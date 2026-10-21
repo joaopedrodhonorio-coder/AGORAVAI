@@ -46,7 +46,7 @@ salvarProjetoBotao.textContent = "Salvar projeto";
 fotoTexto.textContent = "Adicionar fotos";
 videoTexto.textContent = "Adicionar vídeos";
 
-function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null) {
+function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null, midiasApresentacao = null) {
     document.querySelector("#modalTitulo").textContent = titulo;
     const textoLegivel = String(texto || "").trim()
         .replace(/\s*\*\s*/g, "\n• ")
@@ -97,7 +97,30 @@ function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null) 
         destinoInline.append(modalTexto, linhaDoTempo);
         modal.classList.remove("aberto");
     } else {
-        modal.querySelector(".modal-caixa").append(modalTexto, linhaDoTempo);
+        const caixaModal = modal.querySelector(".modal-caixa");
+        caixaModal.querySelector(".modal-midias")?.remove();
+        caixaModal.append(modalTexto, linhaDoTempo);
+        const fotos = listaDeCaminhos(midiasApresentacao?.foto_paths || midiasApresentacao?.foto_path);
+        const videos = listaDeCaminhos(midiasApresentacao?.video_paths || midiasApresentacao?.video_path);
+        if (fotos.length || videos.length) {
+            const gradeMidias = document.createElement("div");
+            gradeMidias.className = "modal-midias";
+            fotos.forEach((caminho) => {
+                const imagem = document.createElement("img");
+                imagem.src = urlMidia(caminho);
+                imagem.alt = `Foto de ${titulo}`;
+                gradeMidias.append(imagem);
+            });
+            videos.forEach((caminho) => {
+                const video = document.createElement("video");
+                video.src = urlMidia(caminho);
+                video.controls = true;
+                video.preload = "metadata";
+                video.setAttribute("aria-label", `Vídeo de ${titulo}`);
+                gradeMidias.append(video);
+            });
+            caixaModal.append(gradeMidias);
+        }
         modal.classList.add("aberto");
     }
 }
@@ -252,6 +275,7 @@ function criarCardProjeto(projeto) {
             numero.className = "timeline-card-numero";
             numero.textContent = indice === 0 ? "PROJETO" : `ETAPA ${String(indice).padStart(2, "0")}`;
             const fotoCapa = listaDeCaminhos(etapa.foto_paths || etapa.foto_path)[0];
+            const videoCapa = listaDeCaminhos(etapa.video_paths || etapa.video_path)[0];
             if (fotoCapa) {
                 const imagemCarta = document.createElement("img");
                 imagemCarta.className = "timeline-card-foto";
@@ -259,10 +283,27 @@ function criarCardProjeto(projeto) {
                 imagemCarta.alt = "";
                 imagemCarta.setAttribute("aria-hidden", "true");
                 carta.append(imagemCarta);
+            } else if (videoCapa) {
+                const videoCarta = document.createElement("video");
+                videoCarta.className = "timeline-card-video";
+                videoCarta.src = urlMidia(videoCapa);
+                videoCarta.muted = true;
+                videoCarta.autoplay = true;
+                videoCarta.loop = true;
+                videoCarta.playsInline = true;
+                videoCarta.preload = "metadata";
+                videoCarta.setAttribute("aria-hidden", "true");
+                carta.append(videoCarta);
             }
             const tituloCarta = document.createElement("strong");
             tituloCarta.textContent = etapa.titulo || `Projeto ${projeto.numero}`;
             carta.append(numero, tituloCarta);
+            if (videoCapa) {
+                const seloVideo = document.createElement("span");
+                seloVideo.className = "timeline-card-video-badge";
+                seloVideo.textContent = "▶ VÍDEO";
+                carta.append(seloVideo);
+            }
             carta.setAttribute("aria-label", `Mostrar ${numero.textContent}: ${etapa.titulo || projeto.titulo}`);
             carta.addEventListener("click", () => selecionarEtapa(indice));
             cartas.append(carta);
@@ -278,7 +319,7 @@ function criarCardProjeto(projeto) {
     }
     detalhes.addEventListener("click", () => {
         const etapa = etapas[etapaAtiva];
-        mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", []);
+        mostrarProjeto(etapa.titulo || projeto.titulo, etapa.resumo || "", [], null, etapa);
     });
     conteudo.append(etiqueta, titulo, data, resumo, detalhes);
     if (etapas.length > 1) card.append(deck);
