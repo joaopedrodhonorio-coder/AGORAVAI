@@ -393,8 +393,8 @@ async function carregarProjetos() {
     if (error) {
         console.error("Erro ao carregar projetos:", error);
         projetosVazio.hidden = false;
-        projetosVazio.textContent = "Não foi possível carregar os projetos. Confira se a configuração do Supabase foi executada.";
-        if (adminStatus) adminStatus.textContent = "Falha ao carregar os projetos.";
+        projetosVazio.textContent = `Não foi possível carregar os projetos. Erro ${error.code || "sem código"}: ${error.message || "motivo não informado"}`;
+        if (adminStatus) adminStatus.textContent = `Falha ao carregar projetos: ${error.message || "motivo não informado"}`;
         return;
     }
     projetosCarregados = data || [];
