@@ -188,7 +188,20 @@ function criarCardProjeto(projeto) {
     deckTitulo.textContent = "Etapas e atualizações";
     const cartas = document.createElement("div");
     cartas.className = "timeline-botoes";
-    deck.append(deckTitulo, cartas);
+    const controles = document.createElement("div");
+    controles.className = "timeline-controles";
+    const etapaAnterior = document.createElement("button");
+    etapaAnterior.type = "button";
+    etapaAnterior.className = "timeline-controle";
+    etapaAnterior.textContent = "← Anterior";
+    const etapaIndicador = document.createElement("span");
+    etapaIndicador.className = "timeline-indicador";
+    const proximaEtapa = document.createElement("button");
+    proximaEtapa.type = "button";
+    proximaEtapa.className = "timeline-controle";
+    proximaEtapa.textContent = "Próxima →";
+    controles.append(etapaAnterior, etapaIndicador, proximaEtapa);
+    deck.append(deckTitulo, cartas, controles);
 
     const midias = document.createElement("div");
     midias.className = "projeto-midias";
@@ -208,6 +221,7 @@ function criarCardProjeto(projeto) {
     const selecionarEtapa = (indice) => {
         etapaAtiva = indice;
         const etapa = etapas[indice];
+        etapaIndicador.textContent = `${indice + 1} de ${etapas.length}`;
         etiqueta.textContent = indice === 0
             ? `PROJETO ${String(projeto.numero).padStart(2, "0")}`
             : `ATUALIZAÇÃO ${String(indice).padStart(2, "0")}`;
@@ -253,6 +267,14 @@ function criarCardProjeto(projeto) {
             carta.addEventListener("click", () => selecionarEtapa(indice));
             cartas.append(carta);
         });
+        etapaAnterior.addEventListener("click", () => {
+            selecionarEtapa((etapaAtiva - 1 + etapas.length) % etapas.length);
+        });
+        proximaEtapa.addEventListener("click", () => {
+            selecionarEtapa((etapaAtiva + 1) % etapas.length);
+        });
+    } else {
+        controles.hidden = true;
     }
     detalhes.addEventListener("click", () => {
         const etapa = etapas[etapaAtiva];

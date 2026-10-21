@@ -1026,6 +1026,41 @@ footer strong {
     margin: 6px auto 18px;
 }
 
+.timeline-controles {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: -4px auto 10px;
+}
+
+.timeline-controle {
+    padding: 9px 13px;
+    border: 1px solid #493a72;
+    border-radius: 999px;
+    background: #17132a;
+    color: #eee9ff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: border-color .2s ease, background .2s ease, transform .2s ease;
+}
+
+.timeline-controle:hover {
+    border-color: #a46aff;
+    background: #24183b;
+    transform: translateY(-1px);
+}
+
+.timeline-indicador {
+    min-width: 48px;
+    color: #b9afcf;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+}
+
 .timeline-card {
     position: absolute;
     left: calc(50% - 130px);
