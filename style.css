@@ -603,7 +603,7 @@ footer strong {
     inset: 0;
     background: #000000aa;
     backdrop-filter: blur(8px);
-    z-index: 10;
+    z-index: 1000;
     place-items: center;
     padding: 20px;
 }
@@ -1014,7 +1014,7 @@ footer strong {
 .timeline-botoes {
     position: relative;
     width: min(100%, 650px);
-    height: 292px;
+    height: 330px;
     margin: 6px auto 18px;
 }
 
@@ -1076,7 +1076,7 @@ footer strong {
 .timeline-card.ativo:hover {
     border-color: #b58bff;
     box-shadow: 0 22px 44px rgba(93, 44, 183, .45);
-    transform: translateX(var(--current-x, var(--card-x))) translateY(-25px) rotate(0) scale(1.08);
+    transform: translateX(var(--current-x, var(--card-x))) translateY(-12px) rotate(0) scale(1.08);
 }
 
 .timeline-card.ativo .timeline-card-foto,
@@ -1085,7 +1085,7 @@ footer strong {
 }
 
 .timeline-card-numero {
-    color: #b889ff;
+    color: #fff;
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.5px;
@@ -1125,7 +1125,7 @@ footer strong {
 
 @media (max-width: 650px) {
     .timeline-botoes {
-        height: 245px;
+        height: 285px;
         overflow: hidden;
     }
 
