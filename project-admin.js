@@ -39,6 +39,7 @@ let projetoEmEdicao = null;
 let atualizacaoEmEdicao = null;
 let projetoEmConversao = null;
 let atualizacoesCarregadas = {};
+let apresentacaoInlineAtiva = null;
 let administradorAtivo = false;
 
 document.querySelector("#projetos").append(listaProjetos, projetosVazio);
@@ -46,7 +47,7 @@ salvarProjetoBotao.textContent = "Salvar projeto";
 fotoTexto.textContent = "Adicionar fotos";
 videoTexto.textContent = "Adicionar vídeos";
 
-function mostrarProjeto(titulo, texto, atualizacoes = []) {
+function mostrarProjeto(titulo, texto, atualizacoes = [], destinoInline = null) {
     document.querySelector("#modalTitulo").textContent = titulo;
     const textoLegivel = String(texto || "").trim()
         .replace(/\s*\*\s*/g, "\n• ")
@@ -68,12 +69,12 @@ function mostrarProjeto(titulo, texto, atualizacoes = []) {
     }
     const restante = textoLegivel.slice(inicio).trim();
     if (restante) modalTexto.append(document.createTextNode(restante));
-    modalTexto.after(linhaDoTempo);
     linhaDoTempo.hidden = atualizacoes.length === 0;
     timelineBotoes.replaceChildren();
     timelineConteudo.replaceChildren();
+    const larguraDoDeck = destinoInline?.clientWidth || timelineBotoes.clientWidth;
     const espalhamento = atualizacoes.length > 1
-        ? Math.min(38, Math.max(15, (timelineBotoes.clientWidth - 150) / (atualizacoes.length - 1)))
+        ? Math.min(38, Math.max(15, (larguraDoDeck - 150) / (atualizacoes.length - 1)))
         : 0;
     atualizacoes.forEach((atualizacao, indice) => {
         const botao = document.createElement("button");
@@ -93,7 +94,37 @@ function mostrarProjeto(titulo, texto, atualizacoes = []) {
         timelineBotoes.append(botao);
     });
     if (atualizacoes.length) mostrarAtualizacao(atualizacoes[0], timelineBotoes.firstElementChild);
-    modal.classList.add("aberto");
+    if (destinoInline) {
+        destinoInline.append(modalTexto, linhaDoTempo);
+        modal.classList.remove("aberto");
+    } else {
+        modal.querySelector(".modal-caixa").append(modalTexto, linhaDoTempo);
+        modal.classList.add("aberto");
+    }
+}
+
+function fecharApresentacaoInline() {
+    if (!apresentacaoInlineAtiva) return;
+    const modalTitulo = document.querySelector("#modalTitulo");
+    modalTitulo.after(document.querySelector("#modalTexto"));
+    document.querySelector("#modalTexto").after(linhaDoTempo);
+    apresentacaoInlineAtiva.painel.remove();
+    apresentacaoInlineAtiva.botao.textContent = "Ver apresentação →";
+    apresentacaoInlineAtiva = null;
+}
+
+function abrirApresentacaoInline(card, projeto, botao) {
+    if (apresentacaoInlineAtiva?.card === card) {
+        fecharApresentacaoInline();
+        return;
+    }
+    fecharApresentacaoInline();
+    const painel = document.createElement("div");
+    painel.className = "projeto-apresentacao-inline";
+    card.append(painel);
+    apresentacaoInlineAtiva = { card, painel, botao };
+    botao.textContent = "Fechar apresentação ↑";
+    mostrarProjeto(projeto.titulo, projeto.resumo, [projeto, ...(atualizacoesCarregadas[projeto.id] || [])], painel);
 }
 
 function mostrarAtualizacao(atualizacao, botaoAtivo) {
@@ -187,7 +218,7 @@ function criarCardProjeto(projeto) {
     detalhes.type = "button";
     detalhes.className = "ver-mais";
     detalhes.textContent = "Ver apresentação →";
-    detalhes.addEventListener("click", () => mostrarProjeto(titulo.textContent, projeto.resumo, [projeto, ...(atualizacoesCarregadas[projeto.id] || [])]));
+    detalhes.addEventListener("click", () => abrirApresentacaoInline(card, projeto, detalhes));
     conteudo.append(etiqueta, titulo, resumo, detalhes);
     card.append(midias, conteudo);
     listaProjetos.appendChild(card);
