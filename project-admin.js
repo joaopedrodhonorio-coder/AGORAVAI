@@ -203,7 +203,7 @@ function criarCardProjeto(projeto) {
     const card = document.createElement("article");
     card.className = "projeto";
     const etapas = [projeto, ...(atualizacoesCarregadas[projeto.id] || [])];
-    let etapaAtiva = etapas.length - 1;
+    let etapaAtiva = 0;
 
     const deck = document.createElement("section");
     deck.className = "projeto-etapas";
@@ -405,7 +405,10 @@ async function carregarProjetos() {
         if (adminStatus) adminStatus.textContent = `Falha ao carregar projetos: ${error.message || "motivo não informado"}`;
         return;
     }
-    projetosCarregados = data || [];
+    projetosCarregados = (data || []).sort((a, b) => {
+        const prioridade = (projeto) => /sensor de proximidade/i.test(projeto.titulo || "") ? 0 : 1;
+        return prioridade(a) - prioridade(b) || (a.numero || 0) - (b.numero || 0);
+    });
     const resultadoAtualizacoes = await supabaseClient.from("atualizacoes_trabalhos")
         .select("id, trabalho_id, titulo, resumo, foto_paths, video_paths, created_at")
         .order("created_at", { ascending: true });

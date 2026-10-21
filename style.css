@@ -387,10 +387,11 @@ footer span {
 /* PROJETOS */
 .projetos {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     gap: 20px;
-    margin-top: 45px;
+    width: min(900px, 100%);
+    margin: 45px auto 0;
 }
 
 .projeto {
