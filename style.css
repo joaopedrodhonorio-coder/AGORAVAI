@@ -1014,17 +1014,17 @@ footer strong {
 .timeline-botoes {
     position: relative;
     width: min(100%, 650px);
-    height: 330px;
+    height: 390px;
     margin: 6px auto 18px;
 }
 
 .timeline-card {
     position: absolute;
-    left: calc(50% - 105px);
+    left: calc(50% - 130px);
     bottom: 12px;
     display: flex;
-    width: 210px;
-    height: 250px;
+    width: 260px;
+    height: 300px;
     box-sizing: border-box;
     flex-direction: column;
     justify-content: space-between;
@@ -1125,14 +1125,14 @@ footer strong {
 
 @media (max-width: 650px) {
     .timeline-botoes {
-        height: 285px;
+        height: 320px;
         overflow: hidden;
     }
 
     .timeline-card {
-        left: calc(50% - 85px);
-        width: 170px;
-        height: 205px;
+        left: calc(50% - 100px);
+        width: 200px;
+        height: 240px;
         padding: 13px 11px;
     }
 }
