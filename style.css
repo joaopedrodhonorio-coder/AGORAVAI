@@ -1357,7 +1357,7 @@ footer strong {
 
 @media (max-width: 420px) {
     .projeto-etapas.com-modelo-3d {
-        grid-template-columns: minmax(0, 1fr) 78px;
+        grid-template-columns: minmax(0, max-content) 76px minmax(0, 1fr);
         column-gap: 1px;
         padding-right: 10px;
         padding-left: 10px;
