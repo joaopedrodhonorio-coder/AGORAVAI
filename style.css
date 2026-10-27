@@ -1270,3 +1270,12 @@ footer strong {
         padding: 13px 11px;
     }
 }
+
+
+.projeto-modelo-3d {
+    display: block;
+    width: 100%;
+    height: 310px;
+    border: 0;
+    background: #000;
+}

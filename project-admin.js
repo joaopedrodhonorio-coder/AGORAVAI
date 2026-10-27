@@ -339,6 +339,14 @@ function criarCardProjeto(projeto) {
     if (etapas.length > 1) card.append(deck);
     else card.append(midias);
     card.append(conteudo);
+    if (projeto.numeroExibicao === 2) {
+        const modelo = document.createElement("iframe");
+        modelo.className = "projeto-modelo-3d";
+        modelo.src = "hcsr04-servo-3d.html";
+        modelo.title = "Modelo 3D interativo do sensor HC-SR04 com servo";
+        modelo.loading = "lazy";
+        card.append(modelo);
+    }
     selecionarEtapa(etapaAtiva);
     return card;
 }

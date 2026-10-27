@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HC-SR04 + Servo — 3D</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;width:100%;height:100%;background:#000;color:#f2f5f9;font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
+  #view{position:fixed;inset:0;background:#000}
+  canvas{display:block;width:100%;height:100%;touch-action:none}
+  .label{position:fixed;top:14px;left:16px;font-size:13px;color:#d8e1ec;background:#0009;border:1px solid #343b46;border-radius:9px;padding:8px 11px;pointer-events:none}
+  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:#9da8b6;background:#000b;border:1px solid #292f38;border-radius:8px;padding:7px 10px;white-space:nowrap;pointer-events:none}
+  .controls{position:fixed;right:14px;top:12px;display:flex;gap:6px}
+  button{border:1px solid #343b46;background:#111;color:#f2f5f9;border-radius:8px;padding:8px 10px;font-size:12px}
+  #error{display:none;position:fixed;inset:20% 8%;text-align:center;color:#ddd;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="view"></div>
+<div class="label"><strong>HC-SR04</strong> <span style="color:#9da8b6">+ servo motor</span></div>
+<div class="controls"><button id="pause">Pausar giro</button><button id="reset">Vista inicial</button></div>
+<div class="hint">Arraste para mudar o ângulo · Pinça ou role para aproximar</div>
+<div id="error">Não foi possível carregar o motor 3D.<br>Verifique a conexão com a internet e abra este arquivo em um navegador.</div>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+
+const host=document.getElementById('view');
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,.1,100);
+camera.position.set(0,2.15,8.5);
+camera.lookAt(0,1.25,0);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
+renderer.setSize(innerWidth,innerHeight);
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.2;
+host.appendChild(renderer.domElement);
+scene.add(new THREE.HemisphereLight(0xeaf2ff,0x161a22,2.1));
+const key=new THREE.DirectionalLight(0xffffff,3.5);key.position.set(4,6,7);scene.add(key);
+const fill=new THREE.DirectionalLight(0x4a8fff,2.2);fill.position.set(-4,2,5);scene.add(fill);
+const rim=new THREE.DirectionalLight(0x7caeff,2.0);rim.position.set(2,4,-5);scene.add(rim);
+
+const mat=(color,metalness=0,roughness=.35,extra={})=>new THREE.MeshStandardMaterial({color,metalness,roughness,...extra});
+const blue=mat(0x0753bf,.35,.23,{transparent:true,opacity:.9});
+const pcb=mat(0x0753a6,.38,.27);
+const silver=mat(0xcbd3dc,.86,.22);
+const dark=mat(0x101820,.2,.48);
+const white=mat(0xe8edf2,.12,.31);
+const black=mat(0x121820,.15,.42);
+const gold=mat(0xc4a65f,.65,.28);
+function add(parent,geo,material,pos=[0,0,0],rot=[0,0,0]){
+ const m=new THREE.Mesh(geo,material);m.position.set(...pos);m.rotation.set(...rot);parent.add(m);return m;
+}
+function box(parent,size,material,pos){return add(parent,new THREE.BoxGeometry(...size),material,pos)}
+function cyl(parent,rt,rb,h,material,pos,rot=[0,0,0],segments=48){return add(parent,new THREE.CylinderGeometry(rt,rb,h,segments),material,pos,rot)}
+function roundedBox(parent,size,material,pos,r=.04){
+ // A box with physically beveled-looking edge strips; the main body remains real geometry.
+ const g=new THREE.Group();g.position.set(...pos);parent.add(g);
+ box(g,size,material,[0,0,0]);
+ const edgeMat=material;
+ for(const x of [-1,1])for(const y of [-1,1]){
+   cyl(g,r,r,size[2],edgeMat,[x*(size[0]/2-r),y*(size[1]/2-r),0],[0,0,0],12);
+ }
+ return g;
+}
+
+const base=new THREE.Group();scene.add(base);
+// SG90-like transparent blue servo, frontal label plate and side mounting ears.
+box(base,[1.12,.94,.66],blue,[0,.53,0]);
+box(base,[1.30,.15,.74],blue,[0,.98,0]);
+box(base,[.37,.13,.25],blue,[-.81,.94,0]);
+box(base,[.37,.13,.25],blue,[.81,.94,0]);
+for(const x of [-.86,-.72,.72,.86]){
+ cyl(base,.045,.045,.025,black,[x,1.015,0],[Math.PI/2,0,0],24);
+ cyl(base,.025,.025,.027,silver,[x,1.016,.012],[Math.PI/2,0,0],24);
+}
+// Front label on servo, facing camera (+Z).
+box(base,[.70,.40,.018],black,[0,.43,.342]);
+box(base,[.64,.34,.012],gold,[0,.43,.354]);
+box(base,[.60,.30,.012],black,[0,.43,.365]);
+box(base,[.52,.018,.008],gold,[0,.49,.374]);
+box(base,[.52,.014,.008],gold,[0,.35,.374]);
+// Servo output horn/shaft.
+cyl(base,.22,.22,.13,black,[0,1.07,0]);
+cyl(base,.17,.17,.13,blue,[0,1.17,0]);
+cyl(base,.10,.10,.23,white,[0,1.32,0]);
+cyl(base,.16,.16,.10,white,[0,1.44,0]);
+box(base,[.54,.075,.13],white,[0,1.49,0]);
+
+// The sensor is a distinct 3D part on a pivot so it can sweep while the servo stays frontal.
+const pivot=new THREE.Group();pivot.position.set(0,1.55,0);base.add(pivot);
+box(pivot,[1.90,.90,.105],pcb,[0,.44,0]);
+// PCB top/bottom edges and mounting holes
+box(pivot,[1.84,.018,.012],mat(0x3d8bd0,.3,.35),[0,.89,.06]);
+box(pivot,[1.84,.018,.012],mat(0x03417d,.3,.4),[0,-.01,.06]);
+for(const x of [-.83,.83])for(const y of [.08,.80]){
+ cyl(pivot,.054,.054,.018,silver,[x,y,.064],[0,0,0],24);
+ cyl(pivot,.030,.030,.021,black,[x,y,.077],[0,0,0],24);
+}
+// Transducer cans point toward the camera (+Z): the sensor front is visible.
+function transducer(x){
+ cyl(pivot,.365,.365,.39,silver,[x,.47,.235],[Math.PI/2,0,0],64);
+ // front lip and inset face, all with positive-Z facing
+ cyl(pivot,.335,.335,.055,mat(0xb4bec9,.84,.22),[x,.47,.455],[Math.PI/2,0,0],64);
+ cyl(pivot,.293,.293,.018,dark,[x,.47,.492],[Math.PI/2,0,0],64);
+ cyl(pivot,.254,.254,.018,black,[x,.47,.510],[Math.PI/2,0,0],64);
+ for(let i=-4;i<=4;i++){
+   const v=box(pivot,[.006,.425,.006],mat(0x596b7b,.25,.5),[x+i*.047,.47,.523]);
+   v.rotation.z=i*.045;
+   const h=box(pivot,[.425,.006,.006],mat(0x596b7b,.25,.5),[x,.47+i*.047,.524]);
+   h.rotation.z=-i*.045;
+ }
+ add(pivot,new THREE.TorusGeometry(.235,.005,6,64),silver,[x,.47,.527]);
+}
+transducer(-.51);transducer(.51);
+// Small visible board details and connector pads, no cables.
+box(pivot,[.39,.12,.024],black,[0,.17,.063]);
+for(let i=0;i<4;i++)box(pivot,[.065,.10,.025],gold,[-.24+i*.16,.78,.067]);
+for(let i=0;i<4;i++)cyl(pivot,.018,.018,.018,silver,[-.25+i*.167,.87,.065],[0,0,0],16);
+
+// Keep background pure black and omit all floor planes, radar rays and extra objects.
+base.position.y=-.02;
+let auto=true,drag=false,lastX=0,lastY=0,viewY=0,viewX=0,zoom=8.5;
+const canvas=renderer.domElement;
+canvas.style.touchAction='none';
+canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;viewY+=(e.clientX-lastX)*.009;viewX+=(e.clientY-lastY)*.006;viewX=Math.max(-.65,Math.min(.65,viewX));lastX=e.clientX;lastY=e.clientY});
+canvas.addEventListener('pointerup',()=>drag=false);
+canvas.addEventListener('pointercancel',()=>drag=false);
+canvas.addEventListener('wheel',e=>{zoom=Math.max(5.3,Math.min(12,zoom+(e.deltaY>0?.4:-.4)));camera.position.set(0,2.15,zoom);camera.lookAt(0,1.25,0)},{passive:true});
+document.getElementById('pause').onclick=()=>{auto=!auto;document.getElementById('pause').textContent=auto?'Pausar giro':'Retomar giro'};
+document.getElementById('reset').onclick=()=>{viewY=0;viewX=0;zoom=8.5;camera.position.set(0,2.15,zoom);camera.lookAt(0,1.25,0);auto=true;document.getElementById('pause').textContent='Pausar giro'};
+const clock=new THREE.Clock();
+function animate(){
+ requestAnimationFrame(animate);
+ const t=clock.getElapsedTime();
+ pivot.rotation.y=(auto?Math.sin(t*.82)*.62:0)+viewY;
+ pivot.rotation.x=viewX;
+ renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+</html>
