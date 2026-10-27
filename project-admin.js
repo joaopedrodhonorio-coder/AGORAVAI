@@ -218,7 +218,7 @@ function criarCardProjeto(projeto) {
     const modelo3d = projeto.numeroExibicao === 2 ? document.createElement("iframe") : null;
     if (modelo3d) {
         modelo3d.className = "projeto-modelo-3d";
-        modelo3d.src = "hcsr04-servo-3d.html?v=20261027-title-raised-large";
+        modelo3d.src = "hcsr04-servo-3d.html?v=20261027-title-tight-model";
         modelo3d.title = "Modelo 3D interativo do sensor HC-SR04 com servo";
         modelo3d.loading = "lazy";
         deck.classList.add("com-modelo-3d");
