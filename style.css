@@ -1283,10 +1283,10 @@ footer strong {
 
 .projeto-etapas.com-modelo-3d {
     display: grid;
-    grid-template-columns: max-content 105px minmax(0, 1fr);
+    grid-template-columns: max-content 96px minmax(0, 1fr);
     grid-template-rows: auto auto auto;
     align-items: center;
-    column-gap: 10px;
+    column-gap: 4px;
     padding-top: 2px;
 }
 
@@ -1308,8 +1308,8 @@ footer strong {
     display: block;
     justify-self: start;
     align-self: center;
-    width: 100px;
-    height: 78px;
+    width: 92px;
+    height: 72px;
     margin: 0;
     border: 0;
     background: transparent;
@@ -1319,7 +1319,7 @@ footer strong {
     grid-column: 1 / -1;
     grid-row: 2;
     height: 330px;
-    margin: 4px auto 12px;
+    margin: 42px auto 18px;
 }
 
 .projeto-etapas.com-modelo-3d .timeline-controles {
@@ -1337,7 +1337,7 @@ footer strong {
 
 @media (max-width: 800px) {
     .projeto-etapas.com-modelo-3d {
-        grid-template-columns: minmax(0, max-content) 95px minmax(0, 1fr);
+        grid-template-columns: minmax(0, max-content) 90px minmax(0, 1fr);
     }
 
     .projeto-etapas.com-modelo-3d h4 {
@@ -1345,32 +1345,32 @@ footer strong {
     }
 
     .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
-        width: 90px;
-        height: 70px;
+        width: 86px;
+        height: 68px;
     }
 
     .projeto-etapas.com-modelo-3d .timeline-botoes {
         height: 345px;
-        margin: 4px auto 14px;
+        margin: 40px auto 18px;
     }
 }
 
 @media (max-width: 420px) {
     .projeto-etapas.com-modelo-3d {
-        grid-template-columns: minmax(0, 1fr) 82px;
-        column-gap: 6px;
+        grid-template-columns: minmax(0, 1fr) 78px;
+        column-gap: 3px;
         padding-right: 10px;
         padding-left: 10px;
     }
 
     .projeto-etapas.com-modelo-3d h4 {
-        max-width: 195px;
+        max-width: 170px;
         font-size: 19px;
     }
 
     .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
         justify-self: end;
-        width: 78px;
-        height: 62px;
+        width: 74px;
+        height: 58px;
     }
 }
