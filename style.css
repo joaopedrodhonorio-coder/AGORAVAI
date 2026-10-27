@@ -1281,21 +1281,45 @@ footer strong {
     background: #000;
 }
 
+.projeto-etapas.com-modelo-3d {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 145px;
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    column-gap: 12px;
+}
+
+.projeto-etapas.com-modelo-3d h4 {
+    grid-column: 1;
+    grid-row: 1;
+    font-size: clamp(20px, 2vw, 24px);
+    line-height: 1.15;
+    text-align: left;
+}
+
 .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
-    position: absolute;
-    z-index: 105;
-    top: 10px;
-    right: 12px;
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
     display: block;
-    width: 190px;
-    height: 155px;
+    justify-self: end;
+    width: 140px;
+    height: 110px;
+    margin: 0;
     border: 0;
     background: transparent;
 }
 
 .projeto-etapas.com-modelo-3d .timeline-botoes {
+    grid-column: 1 / -1;
+    grid-row: 2;
     height: 330px;
-    margin-top: 150px;
+    margin: 12px auto 18px;
+}
+
+.projeto-etapas.com-modelo-3d .timeline-controles {
+    grid-column: 1 / -1;
+    grid-row: 3;
 }
 
 .projeto-modelo-3d.solto {
@@ -1307,17 +1331,40 @@ footer strong {
 }
 
 @media (max-width: 800px) {
+    .projeto-etapas.com-modelo-3d {
+        grid-template-columns: minmax(0, 1fr) 125px;
+        column-gap: 8px;
+    }
+
+    .projeto-etapas.com-modelo-3d h4 {
+        font-size: clamp(18px, 2.6vw, 22px);
+    }
+
     .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
-        position: relative;
-        inset: auto;
-        width: min(100%, 260px);
-        height: 190px;
-        margin: 12px auto;
-        background: transparent;
+        width: 120px;
+        height: 95px;
     }
 
     .projeto-etapas.com-modelo-3d .timeline-botoes {
         height: 345px;
-        margin: 6px auto 18px;
+        margin: 12px auto 18px;
+    }
+}
+
+@media (max-width: 420px) {
+    .projeto-etapas.com-modelo-3d {
+        grid-template-columns: minmax(0, 1fr) 100px;
+        column-gap: 6px;
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .projeto-etapas.com-modelo-3d h4 {
+        font-size: 18px;
+    }
+
+    .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
+        width: 100px;
+        height: 80px;
     }
 }

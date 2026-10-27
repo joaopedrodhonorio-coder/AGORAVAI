@@ -24,7 +24,7 @@ const host=document.getElementById('view');
 const scene=new THREE.Scene();
 scene.background=null;
 const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,.1,100);
-camera.position.set(0,2.15,6.8);
+camera.position.set(0,2.15,7.8);
 camera.lookAt(0,1.25,0);
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
@@ -113,7 +113,7 @@ for(let i=0;i<4;i++)cyl(pivot,.018,.018,.018,silver,[-.25+i*.167,.87,.065],[0,0,
 
 // Keep the scene transparent so the site background shows through.
 base.position.y=-.02;
-let drag=false,lastX=0,lastY=0,viewY=0,viewX=0,zoom=6.8;
+let drag=false,lastX=0,lastY=0,viewY=0,viewX=0,zoom=7.8;
 const canvas=renderer.domElement;
 canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
