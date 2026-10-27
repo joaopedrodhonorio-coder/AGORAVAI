@@ -215,6 +215,14 @@ function criarCardProjeto(projeto) {
     deck.className = "projeto-etapas";
     const deckTitulo = document.createElement("h4");
     deckTitulo.textContent = "Etapas e atualizações";
+    const modelo3d = projeto.numeroExibicao === 2 ? document.createElement("iframe") : null;
+    if (modelo3d) {
+        modelo3d.className = "projeto-modelo-3d";
+        modelo3d.src = "hcsr04-servo-3d.html";
+        modelo3d.title = "Modelo 3D interativo do sensor HC-SR04 com servo";
+        modelo3d.loading = "lazy";
+        deck.classList.add("com-modelo-3d");
+    }
     const cartas = document.createElement("div");
     cartas.className = "timeline-botoes";
     const controles = document.createElement("div");
@@ -230,7 +238,8 @@ function criarCardProjeto(projeto) {
     proximaEtapa.className = "timeline-controle";
     proximaEtapa.textContent = "Próxima →";
     controles.append(etapaAnterior, etapaIndicador, proximaEtapa);
-    deck.append(deckTitulo, cartas, controles);
+    if (modelo3d) deck.append(deckTitulo, modelo3d, cartas, controles);
+    else deck.append(deckTitulo, cartas, controles);
 
     const midias = document.createElement("div");
     midias.className = "projeto-midias";
@@ -337,16 +346,14 @@ function criarCardProjeto(projeto) {
     });
     conteudo.append(etiqueta, titulo, data, resumo, detalhes);
     if (etapas.length > 1) card.append(deck);
-    else card.append(midias);
-    card.append(conteudo);
-    if (projeto.numeroExibicao === 2) {
-        const modelo = document.createElement("iframe");
-        modelo.className = "projeto-modelo-3d";
-        modelo.src = "hcsr04-servo-3d.html";
-        modelo.title = "Modelo 3D interativo do sensor HC-SR04 com servo";
-        modelo.loading = "lazy";
-        card.append(modelo);
+    else {
+        card.append(midias);
+        if (modelo3d) {
+            modelo3d.classList.add("solto");
+            card.append(modelo3d);
+        }
     }
+    card.append(conteudo);
     selecionarEtapa(etapaAtiva);
     return card;
 }
