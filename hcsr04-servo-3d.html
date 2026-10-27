@@ -6,28 +6,14 @@
 <title>HC-SR04 + Servo — 3D</title>
 <style>
   *{box-sizing:border-box}
-  html,body{margin:0;width:100%;height:100%;background:#000;color:#f2f5f9;font-family:system-ui,-apple-system,Segoe UI,sans-serif;overflow:hidden}
-  #view{position:fixed;inset:0;background:#000}
+  html,body{margin:0;width:100%;height:100%;background:transparent;overflow:hidden}
+  #view{position:fixed;inset:0;background:transparent}
   canvas{display:block;width:100%;height:100%;touch-action:none}
-  .label{position:fixed;top:14px;left:16px;font-size:13px;color:#d8e1ec;background:#0009;border:1px solid #343b46;border-radius:9px;padding:8px 11px;pointer-events:none}
-  .hint{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);font-size:11px;color:#9da8b6;background:#000b;border:1px solid #292f38;border-radius:8px;padding:7px 10px;white-space:nowrap;pointer-events:none}
-  .controls{position:fixed;right:14px;top:12px;display:flex;gap:6px}
-  button{border:1px solid #343b46;background:#111;color:#f2f5f9;border-radius:8px;padding:8px 10px;font-size:12px}
-  #error{display:none;position:fixed;inset:20% 8%;text-align:center;color:#ddd;line-height:1.5}
-  @media (max-width:220px){
-    .label{top:5px;left:5px;font-size:9px;padding:4px 6px}
-    .controls{top:auto;right:50%;bottom:30px;transform:translateX(50%);gap:3px}
-    button{padding:4px 5px;font-size:8px}
-    .hint{bottom:3px;max-width:calc(100vw - 8px);font-size:8px;padding:3px 5px;white-space:normal;text-align:center}
-  }
 </style>
 </head>
 <body>
 <div id="view"></div>
-<div class="label"><strong>HC-SR04</strong> <span style="color:#9da8b6">+ servo motor</span></div>
-<div class="controls"><button id="pause">Pausar giro</button><button id="reset">Vista inicial</button></div>
-<div class="hint">Arraste para mudar o ângulo · Pinça ou role para aproximar</div>
-<div id="error">Não foi possível carregar o motor 3D.<br>Verifique a conexão com a internet e abra este arquivo em um navegador.</div>
+
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}
 </script>
@@ -36,13 +22,14 @@ import * as THREE from 'three';
 
 const host=document.getElementById('view');
 const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x000000);
+scene.background=null;
 const camera=new THREE.PerspectiveCamera(34,innerWidth/innerHeight,.1,100);
-camera.position.set(0,2.15,8.5);
+camera.position.set(0,2.15,6.8);
 camera.lookAt(0,1.25,0);
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));
 renderer.setSize(innerWidth,innerHeight);
+renderer.setClearColor(0x000000,0);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.2;
@@ -77,7 +64,7 @@ function roundedBox(parent,size,material,pos,r=.04){
 }
 
 const base=new THREE.Group();scene.add(base);
-// SG90-like transparent blue servo, frontal label plate and side mounting ears.
+// SG90-like transparent blue servo with side mounting ears.
 box(base,[1.12,.94,.66],blue,[0,.53,0]);
 box(base,[1.30,.15,.74],blue,[0,.98,0]);
 box(base,[.37,.13,.25],blue,[-.81,.94,0]);
@@ -86,12 +73,6 @@ for(const x of [-.86,-.72,.72,.86]){
  cyl(base,.045,.045,.025,black,[x,1.015,0],[Math.PI/2,0,0],24);
  cyl(base,.025,.025,.027,silver,[x,1.016,.012],[Math.PI/2,0,0],24);
 }
-// Front label on servo, facing camera (+Z).
-box(base,[.70,.40,.018],black,[0,.43,.342]);
-box(base,[.64,.34,.012],gold,[0,.43,.354]);
-box(base,[.60,.30,.012],black,[0,.43,.365]);
-box(base,[.52,.018,.008],gold,[0,.49,.374]);
-box(base,[.52,.014,.008],gold,[0,.35,.374]);
 // Servo output horn/shaft.
 cyl(base,.22,.22,.13,black,[0,1.07,0]);
 cyl(base,.17,.17,.13,blue,[0,1.17,0]);
@@ -130,9 +111,9 @@ box(pivot,[.39,.12,.024],black,[0,.17,.063]);
 for(let i=0;i<4;i++)box(pivot,[.065,.10,.025],gold,[-.24+i*.16,.78,.067]);
 for(let i=0;i<4;i++)cyl(pivot,.018,.018,.018,silver,[-.25+i*.167,.87,.065],[0,0,0],16);
 
-// Keep background pure black and omit all floor planes, radar rays and extra objects.
+// Keep the scene transparent so the site background shows through.
 base.position.y=-.02;
-let auto=true,drag=false,lastX=0,lastY=0,viewY=0,viewX=0,zoom=8.5;
+let drag=false,lastX=0,lastY=0,viewY=0,viewX=0,zoom=6.8;
 const canvas=renderer.domElement;
 canvas.style.touchAction='none';
 canvas.addEventListener('pointerdown',e=>{drag=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId)});
@@ -140,13 +121,11 @@ canvas.addEventListener('pointermove',e=>{if(!drag)return;viewY+=(e.clientX-last
 canvas.addEventListener('pointerup',()=>drag=false);
 canvas.addEventListener('pointercancel',()=>drag=false);
 canvas.addEventListener('wheel',e=>{zoom=Math.max(5.3,Math.min(12,zoom+(e.deltaY>0?.4:-.4)));camera.position.set(0,2.15,zoom);camera.lookAt(0,1.25,0)},{passive:true});
-document.getElementById('pause').onclick=()=>{auto=!auto;document.getElementById('pause').textContent=auto?'Pausar giro':'Retomar giro'};
-document.getElementById('reset').onclick=()=>{viewY=0;viewX=0;zoom=8.5;camera.position.set(0,2.15,zoom);camera.lookAt(0,1.25,0);auto=true;document.getElementById('pause').textContent='Pausar giro'};
 const clock=new THREE.Clock();
 function animate(){
  requestAnimationFrame(animate);
  const t=clock.getElapsedTime();
- pivot.rotation.y=(auto?Math.sin(t*.82)*.62:0)+viewY;
+ pivot.rotation.y=Math.sin(t*.82)*.62+viewY;
  pivot.rotation.x=viewX;
  renderer.render(scene,camera);
 }
