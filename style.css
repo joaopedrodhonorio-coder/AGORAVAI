@@ -1374,3 +1374,29 @@ footer strong {
         height: 58px;
     }
 }
+@media (max-width: 420px) {
+    .projeto-etapas.com-modelo-3d {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: flex-start;
+        column-gap: 2px;
+        row-gap: 0;
+    }
+
+    .projeto-etapas.com-modelo-3d h4 {
+        flex: 0 1 170px;
+        max-width: 170px;
+    }
+
+    .projeto-etapas.com-modelo-3d > .projeto-modelo-3d {
+        flex: 0 0 74px;
+        width: 74px;
+        margin: 0;
+    }
+
+    .projeto-etapas.com-modelo-3d .timeline-botoes,
+    .projeto-etapas.com-modelo-3d .timeline-controles {
+        flex: 0 0 100%;
+    }
+}
